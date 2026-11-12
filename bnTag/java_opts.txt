@@ -1,0 +1,1 @@
+-Xms512m -Xmx2048m -Dweblogic.home=$ORACLE_HOME/wlserver/server -Dosb.home=$ORACLE_HOME/osb -Djava.io.tmpdir=C:/Temp/osbinstance

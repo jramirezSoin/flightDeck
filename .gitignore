@@ -1,1 +1,7 @@
 flightDeck/__pycache__/
+
+# bnTag: generado desde application.properties.tpl, contiene datos personales
+bnTag/config/application.properties
+bnTag/target/
+# llave de cifrado del dominio WebLogic
+bnTag/security/

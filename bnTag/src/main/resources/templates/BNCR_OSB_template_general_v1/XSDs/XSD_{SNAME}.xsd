@@ -1,0 +1,24 @@
+<xsd:schema targetNamespace="http://bncr.com/BNCR{SNAME}" elementFormDefault="qualified" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://bncr.com/BNCR{SNAME}" xmlns:hd="http://bncr.com/BNCRCabeceraServicioAT">
+              <xsd:import schemaLocation="XSD_Cabecera{SNAME}.xsd" namespace="http://bncr.com/BNCRCabeceraServicioAT"/>
+  <xsd:element name="Entrada">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="Cabecera" type="hd:BNCRCabeceraPeticionServicioATType"/>
+        <xsd:element name="EntradaServicio" type="entradaServicio"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+  <xsd:complexType name="entradaServicio">
+    <xsd:sequence>
+      <xsd:element name="identificacion" minOccurs="0" nillable="true" type="xsd:string"/>
+    </xsd:sequence>
+  </xsd:complexType>
+    <xsd:element name="Salida">
+    <xsd:complexType>
+      <xsd:sequence>
+              <xsd:element name="codigoError" type="xsd:string" minOccurs="0"/>
+              <xsd:element name="mensajeError" type="xsd:string" minOccurs="0"/>  
+        </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+</xsd:schema>

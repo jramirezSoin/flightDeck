@@ -1,0 +1,26 @@
+<application xmlns:soa="http://www.oracle.com/soa/rest" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ns0="http://bncr.com/BNCRCabeceraServicioAT" xmlns:inp1="http://bncr.com/BNCR{SNAME}" xmlns="http://wadl.dev.java.net/2009/02">
+   <doc title="PS_{SNAME}_REST_v1">RestService</doc>
+   <grammars>
+      <xsd:schema xmlns:tns="http://xmlns.oracle.com/BNCR_OSB_WORKSPACE/{NAME}/WS_{SNAME}" xmlns:inp2="http://www.bea.com/wli/sb/context" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+            <xsd:import namespace="http://bncr.com/BNCR{SNAME}" schemaLocation="../XSDs/XSD_{SNAME}.xsd"/>
+        </xsd:schema>
+      <xsd:schema xmlns:tns="http://xmlns.oracle.com/BNCR_OSB_WORKSPACE/{NAME}/WS_{SNAME}" xmlns:inp2="http://www.bea.com/wli/sb/context" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+            <xsd:import namespace="http://www.bea.com/wli/sb/context" schemaLocation="../../BNCR_OSB_TemplateAtomicos_v1/XSDs/XSD_ContextoOSB.xsd"/>
+        </xsd:schema>
+   </grammars>
+   <resources>
+      <resource path="/">
+         <method name="POST" soa:wsdlOperation="execute">
+            <request>
+               <representation mediaType="application/json" element="cns:Entrada" xmlns:cns="http://bncr.com/BNCR{SNAME}"/>
+            </request>
+            <response status="200">
+               <representation mediaType="application/json" element="cns:Salida" xmlns:cns="http://bncr.com/BNCR{SNAME}"/>
+            </response>
+            <response status="400" soa:wsdlFaultName="executefault">
+               <representation mediaType="application/xml" element="cns:fault" xmlns:cns="http://www.bea.com/wli/sb/context"/>
+            </response>
+         </method>
+      </resource>
+   </resources>
+</application>

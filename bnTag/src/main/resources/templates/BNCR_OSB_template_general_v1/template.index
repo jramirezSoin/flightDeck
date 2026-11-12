@@ -1,0 +1,10 @@
+BNCR_OSB_{SNAME}.jpr
+Pipelines/PL_FLO_{SNAME}.pipeline
+pom.xml
+ProxyServices/PS_{SNAME}_REST_v1.proxy
+ProxyServices/PS_{SNAME}_SOAP_v1.proxy
+servicebus.sboverview
+WADLs/PS_{SNAME}_REST_v1.wadl
+WSDLs/WS_{SNAME}.wsdl
+XSDs/XSD_Cabecera{SNAME}.xsd
+XSDs/XSD_{SNAME}.xsd

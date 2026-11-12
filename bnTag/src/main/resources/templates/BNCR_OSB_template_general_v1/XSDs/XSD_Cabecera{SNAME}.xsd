@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://bncr.com/BNCRCabeceraServicioAT"
+            targetNamespace="http://bncr.com/BNCRCabeceraServicioAT" elementFormDefault="qualified">
+  <xsd:complexType name="BNCRCabeceraPeticionServicioATType">
+    <xsd:sequence>
+      <xsd:element name="codCon" type="xsd:string"/>
+      <xsd:element name="codUsu" type="xsd:string"/>
+      <xsd:element name="codServicioPadre" type="xsd:string"/>
+      <xsd:element name="idCorrelacionConsumidor" type="xsd:string"/>
+      <xsd:element name="idflujoPadre" type="xsd:string"/>
+      <xsd:element name="NombreServicioPadre" type="xsd:string"/>
+      <xsd:element name="dirIp" type="xsd:string"/>
+      <xsd:element name="fechaHorConsum" type="xsd:dateTime"/>
+      <xsd:element name="version_del_servicio_Padre" type="xsd:string"/>
+      <xsd:element name="idConsumidor" type="xsd:string"/>
+      <xsd:element name="usuarioConsumidor" type="xsd:string"/>
+      <xsd:element name="nombreConsumidor" type="xsd:string"/>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>
