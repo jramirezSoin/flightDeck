@@ -16,5 +16,5 @@ if [[ " $* " == *" -osb "* && " $* " != *" --skipCompile "* ]]; then
     rm -rf /c/Temp/osbinstance
     CLASSPATH=$(envsubst < classpath.txt | tr '\\' '/' | sed 's|C:|/c|g')
 fi
-echo "CLASSPATH: $CLASSPATH"
+#echo "CLASSPATH: $CLASSPATH"
 java $JAVA_OPTS -cp "target/installbn-1.0.0.jar:${CLASSPATH}" com.soin.App "$@"
