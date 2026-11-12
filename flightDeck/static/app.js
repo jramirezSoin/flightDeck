@@ -61,7 +61,7 @@ function installArgs() {
   return args;
 }
 function createArgs() {
-  const args = ["-osb", $("createName").value.trim() || "<nombre>", "--create"];
+  const args = [$("createTarget").value === "soa" ? "-soa" : "-osb", $("createName").value.trim() || "<nombre>", "--create"];
   if ($("rest").checked) args.push("--rest");
   return args;
 }
@@ -71,6 +71,7 @@ function refreshCommands() {
 }
 
 ["target"].forEach((id) => $(id).addEventListener("change", refreshForm));
+$("createTarget").addEventListener("change", refreshCommands);
 ["name", "createName"].forEach((id) => $(id).addEventListener("input", () => { clearError(id); refreshCommands(); }));
 ["scopeGit", "scopeProject", "doCompile", "doImport", "rest"].forEach((id) => $(id).addEventListener("change", refreshCommands));
 
@@ -228,7 +229,7 @@ $("install-form").addEventListener("submit", (ev) => {
 $("create-form").addEventListener("submit", (ev) => {
   ev.preventDefault();
   if (!nameValid("createName", "createNameError")) return;
-  runJob({ target: "osb", name: $("createName").value.trim(), create: true, rest: $("rest").checked });
+  runJob({ target: $("createTarget").value, name: $("createName").value.trim(), create: true, rest: $("rest").checked });
 });
 
 async function runJob(body) {

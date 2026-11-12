@@ -36,7 +36,7 @@
       <div class="nav-group">
         <div class="nav-parent"><i class="bi bi-diagram-3" aria-hidden="true"></i> InstallBN</div>
         <button type="button" class="nav-item nav-sub active" data-view="install" aria-current="page"><i class="bi bi-cloud-arrow-up" aria-hidden="true"></i> Instalar</button>
-        <button type="button" class="nav-item nav-sub" data-view="create"><i class="bi bi-plus-square" aria-hidden="true"></i> Crear OSB</button>
+        <button type="button" class="nav-item nav-sub" data-view="create"><i class="bi bi-plus-square" aria-hidden="true"></i> Crear</button>
       </div>
       <div class="nav-group">
         <button type="button" class="nav-item" data-view="git"><i class="bi bi-git" aria-hidden="true"></i> Git</button>
@@ -131,15 +131,24 @@
         <!-- Vista: Crear OSB -->
         <section id="view-create" data-view="create" aria-labelledby="t-create" hidden>
           <header class="page-head">
-            <h2 id="t-create">Crear OSB</h2>
-            <p>Genera un proyecto OSB nuevo en el workspace local a partir de la plantilla.</p>
+            <h2 id="t-create">Crear</h2>
+            <p>Genera un proyecto OSB o SOA nuevo en su workspace local a partir de la plantilla.</p>
           </header>
 
           <form id="create-form" class="card" novalidate>
-            <div class="field">
-              <label for="createName">Nombre del OSB</label>
-              <input id="createName" type="text" autocomplete="off" spellcheck="false" placeholder="Nombre del nuevo OSB"
-                     aria-describedby="createNameError">
+            <div class="field-row">
+              <div class="field field-type">
+                <label for="createTarget">Tipo</label>
+                <select id="createTarget">
+                  <option value="osb">OSB</option>
+                  <option value="soa">SOA</option>
+                </select>
+              </div>
+              <div class="field field-grow">
+                <label for="createName">Nombre</label>
+                <input id="createName" type="text" autocomplete="off" spellcheck="false" placeholder="Nombre del nuevo OSB / SOA"
+                       aria-describedby="createNameError">
+              </div>
             </div>
             <p class="field-error" id="createNameError" role="alert" hidden></p>
 
@@ -149,7 +158,7 @@
                 <label class="switch">
                   <input type="checkbox" role="switch" id="rest">
                   <span class="switch-track" aria-hidden="true"></span>
-                  <span class="switch-text"><b>Incluir servicio REST</b><small>Agrega el ProxyService REST y su WADL.</small></span>
+                  <span class="switch-text"><b>Incluir servicio REST</b><small>Agrega el ProxyService REST y su WADL (si la plantilla los incluye).</small></span>
                 </label>
               </div>
             </fieldset>

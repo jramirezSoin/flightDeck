@@ -94,7 +94,12 @@ public class App {
 
             Pipeline pipeline = new Pipeline();
 
-            if (context.isSOA()) {
+            if (context.isSOA() && context.isCreate()) {
+                pipeline
+                    .addStep(new LoadContext())
+                    .addStep(new CreateSOAStep());
+            } 
+            else if (context.isSOA()) {
                 pipeline
                     .addStep(new LoadContext())
                     .addStep(new UploadFileStep(DeployTarget.SOA))

@@ -1,0 +1,10 @@
+SOA/BPEL/.designer/BPEL_{SNAME}_graphics.xml
+SOA/BPEL/BPEL_{SNAME}.bpel
+SOA/composite.xml
+SOA/SCA-INF/classes/scac.log
+SOA/SCA-INF/classesscac_out.xml
+SOA/SCA-INF/{NAME}.diagram.jpg
+SOA/SCA-INF/{NAME}.diagram.xml
+SOA/Schemas/BPEL_{SNAME}.xsd
+SOA/WSDLs/BPEL_{SNAME}.wsdl
+{NAME}.jpr

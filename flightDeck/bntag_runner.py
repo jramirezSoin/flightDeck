@@ -19,6 +19,7 @@ TMP_DIR = "C:/Temp/osbinstance"  # mismo valor que el rm -rf de installBN.sh
 NAME_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
 
 STEPS_SOA = ["LoadContext", "UploadFileStep", "ImportStep"]
+STEPS_SOA_CREATE = ["LoadContext", "CreateSOAStep"]
 STEPS_OSB_CREATE = ["LoadContext", "CreateOSBStep"]
 STEPS_OSB = ["LoadContext", "GitStatusStep", "OSBCompile", "UploadFileStep", "ImportStep"]
 
@@ -77,8 +78,17 @@ def validate_request(req: dict) -> tuple[list[str], list[str]]:
         flags[key] = value
 
     if target == "soa":
-        if flags["create"] or flags["rest"] or flags["skipCompile"]:
-            raise RunError("--create, --rest y --skipCompile solo aplican a OSB")
+        if flags["skipCompile"] or flags["project"]:
+            raise RunError("--skipCompile y --project solo aplican a OSB")
+        if flags["rest"] and not flags["create"]:
+            raise RunError("--rest requiere --create")
+        if flags["create"]:
+            if flags["skipImport"]:
+                raise RunError("--create no se combina con --skipImport")
+            args = ["-soa", name, "--create"]
+            if flags["rest"]:
+                args.append("--rest")
+            return args, list(STEPS_SOA_CREATE)
         args = ["-soa", name]
         if flags["skipImport"]:
             args.append("--skipImport")
@@ -131,7 +141,7 @@ def build_command(args: list[str]) -> tuple[list[str], Path, bool]:
 
     classpath = os.pathsep.join([f"target/{JAR_NAME}", extra_cp])
     cmd = [java, *java_opts, "-cp", classpath, "com.soin.App", *args]
-    # Crear un OSB no compila: no hace falta limpiar C:/Temp/osbinstance (y es su java.io.tmpdir).
+    # Crear un OSB/SOA no compila: no hace falta limpiar C:/Temp/osbinstance (y es su java.io.tmpdir).
     return cmd, home, needs_oracle and "--create" not in args
 
 
