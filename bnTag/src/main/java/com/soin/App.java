@@ -1,5 +1,9 @@
 package com.soin;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.soin.logging.Logging;
 import com.soin.pipeline.Pipeline;
 import com.soin.pipeline.PipelineContext;
 import com.soin.pipeline.steps.*;
@@ -9,6 +13,8 @@ import com.soin.pipeline.steps.*;
  * Termina con exit code 1 si los parámetros son inválidos o algún paso falla.
  */
 public class App {
+
+    private static final Logger LOG = Logger.getLogger(App.class.getName());
 
     private static void printUsage() {
         System.out.println("Uso: bntag.sh -osb <OSB name> [--project] [--skipCompile] [--skipImport]");
@@ -24,12 +30,14 @@ public class App {
     }
 
     private static void fail(String message) {
-        System.out.println(message);
+        LOG.severe(message);
         printUsage();
         System.exit(1);
     }
 
     public static void main(String[] args) {
+
+        Logging.configure();
 
         PipelineContext context = new PipelineContext();
 
@@ -113,7 +121,7 @@ public class App {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, "Error inesperado", e);
             System.exit(1);
         }
     }

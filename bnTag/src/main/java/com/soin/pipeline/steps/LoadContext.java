@@ -1,5 +1,10 @@
 package com.soin.pipeline.steps;
 
+import java.io.IOException;
+import java.util.logging.Logger;
+
+import com.soin.logging.Logging;
+
 
 import com.soin.pipeline.PipelineContext;
 import com.soin.pipeline.PipelineStep;
@@ -7,6 +12,8 @@ import com.soin.pipeline.StepResult;
 import com.soin.config.Config;
 
 public class LoadContext implements PipelineStep {
+
+    private static final Logger LOG = Logger.getLogger(LoadContext.class.getName());
 
     /** Devuelve el valor de una propiedad obligatoria o falla nombrándola. */
     private static String required(String key) {
@@ -25,9 +32,21 @@ public class LoadContext implements PipelineStep {
 
         try {
 
-            System.out.println("Cargando contexto...");
+            LOG.info("Cargando contexto...");
 
             Config.loadProperties();
+
+            // Opcional: además de la consola, guardar el log en un archivo
+            String logFile = Config.prop.getProperty("log.file");
+            if (logFile != null && !logFile.trim().isEmpty()) {
+                try {
+                    Logging.addFile(logFile.trim());
+                    LOG.info("Log también en: " + logFile.trim());
+                } catch (IOException e) {
+                    // Un problema con el log no debe impedir la ejecución
+                    LOG.warning("No se pudo abrir el archivo de log '" + logFile.trim() + "': " + e.getMessage());
+                }
+            }
 
             context.setOsbPath(required("osb.dir"));
             context.setSoaPath(required("soa.dir"));
@@ -52,14 +71,14 @@ public class LoadContext implements PipelineStep {
                 context.setKnownHosts(knownHosts.trim());
             }
 
-            System.out.println("OSB Path: " + context.getOsbPath());
-            System.out.println("SOA Path: " + context.getSoaPath());
-            System.out.println("Local File: " + context.getLocalFile());
-            System.out.println("Host: " + context.getHost() + ":" + context.getPort());
-            System.out.println("Script Dir: " + context.getScriptDir());
-            System.out.println("Username: " + context.getUsername());
-            System.out.println("Remote File: " + context.getRemoteFile());
-            System.out.println("Contexto cargado correctamente");
+            LOG.info("OSB Path: " + context.getOsbPath());
+            LOG.info("SOA Path: " + context.getSoaPath());
+            LOG.info("Local File: " + context.getLocalFile());
+            LOG.info("Host: " + context.getHost() + ":" + context.getPort());
+            LOG.info("Script Dir: " + context.getScriptDir());
+            LOG.info("Username: " + context.getUsername());
+            LOG.info("Remote File: " + context.getRemoteFile());
+            LOG.info("Contexto cargado correctamente");
 
             return StepResult.success("Contexto cargado correctamente");
 

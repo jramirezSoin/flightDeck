@@ -2,6 +2,7 @@ package com.soin.services.ssh;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
+import com.soin.logging.Logging;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -34,13 +35,13 @@ public class SshCommand {
 
         ChannelExec channel = null;
 
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        ByteArrayOutputStream error = new ByteArrayOutputStream();
+
         try {
             session.connect(CONNECT_TIMEOUT_MS);
 
             channel = (ChannelExec) session.openChannel("exec");
-
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            ByteArrayOutputStream error = new ByteArrayOutputStream();
 
             // STDOUT/STDERR en tiempo real + guardar resultado
             channel.setOutputStream(new TeeOutputStream(output, System.out));
@@ -79,6 +80,18 @@ public class SshCommand {
                 channel.disconnect();
             }
             session.disconnect();
+
+            // La salida remota ya se mostró en consola en vivo; aquí se guarda en el
+            // archivo de log (si está activo), también cuando el comando falla.
+            logRemoteOutput("stdout", output);
+            logRemoteOutput("stderr", error);
+        }
+    }
+
+    private static void logRemoteOutput(String name, ByteArrayOutputStream buffer) {
+        if (buffer.size() > 0) {
+            Logging.fileOnly("Salida remota (" + name + "):" + System.lineSeparator()
+                    + new String(buffer.toByteArray(), StandardCharsets.UTF_8));
         }
     }
 

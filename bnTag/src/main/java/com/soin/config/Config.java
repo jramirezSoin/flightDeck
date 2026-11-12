@@ -1,5 +1,7 @@
 package com.soin.config;
 
+import java.util.logging.Logger;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -7,6 +9,8 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class Config {
+
+    private static final Logger LOG = Logger.getLogger(Config.class.getName());
 
     public static Properties prop = new Properties();
     final static String propertiesFilePath = "config/application.properties";
@@ -18,7 +22,7 @@ public class Config {
      */
     public static void loadProperties() throws IOException {
         File file = new File(propertiesFilePath);
-        System.out.println("Cargando propiedades desde: " + file.getAbsolutePath());
+        LOG.info("Cargando propiedades desde: " + file.getAbsolutePath());
 
         try (InputStream input = new FileInputStream(file)) {
             prop.load(input);

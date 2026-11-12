@@ -1,5 +1,7 @@
 package com.soin.pipeline.steps;
 
+import java.util.logging.Logger;
+
 import com.soin.pipeline.PipelineContext;
 import com.soin.pipeline.PipelineStep;
 import com.soin.pipeline.StepResult;
@@ -7,6 +9,8 @@ import com.soin.services.ssh.SshCommand;
 
 /** Ejecuta en el servidor el script que importa el OSB o SOA (según el DeployTarget). */
 public class ImportStep implements PipelineStep {
+
+    private static final Logger LOG = Logger.getLogger(ImportStep.class.getName());
 
     private final DeployTarget target;
 
@@ -21,11 +25,11 @@ public class ImportStep implements PipelineStep {
         }
 
         try {
-            System.out.println("Ejecutando script SSH...");
+            LOG.info("Ejecutando script SSH...");
 
             String command = "sh " + context.getScriptDir() + target.script() + " "
                     + SshCommand.shellQuote(target.scriptArgument(context));
-            System.out.println("Comando SSH: " + command);
+            LOG.info("Comando SSH: " + command);
 
             SshCommand.execute(
                     context.getHost(),

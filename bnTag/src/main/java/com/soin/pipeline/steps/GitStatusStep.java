@@ -1,11 +1,15 @@
 package com.soin.pipeline.steps;
 
+import java.util.logging.Logger;
+
 import com.soin.pipeline.PipelineContext;
 import com.soin.pipeline.PipelineStep;
 import com.soin.pipeline.StepResult;
 import com.soin.services.git.GitService;
 
 public class GitStatusStep implements PipelineStep {
+
+    private static final Logger LOG = Logger.getLogger(GitStatusStep.class.getName());
 
     @Override
     public StepResult execute(PipelineContext context) {
@@ -18,8 +22,8 @@ public class GitStatusStep implements PipelineStep {
         }
 
         try {
-            System.out.println("Ejecutando en modo Resource");
-            System.out.println("Revisando cambios en Git...");
+            LOG.info("Ejecutando en modo Resource");
+            LOG.info("Revisando cambios en Git...");
 
             context.setGitFiles(GitService.getStatus(context.getOsbPath(), context.getArchivo()));
 

@@ -60,6 +60,7 @@ Para regenerar el archivo manualmente: borrar `config/application.properties` y 
 | `server.host`, `server.port`, `server.user` | Conexión SSH al servidor |
 | `server.remote.path` | Carpeta remota donde se suben los JARs |
 | `server.script.dir` | Carpeta remota de `installOSB.sh` e `installSOA.sh` |
+| `log.file` | **Opcional.** Además de la consola, guarda el log en este archivo (se agrega al final en cada ejecución, con fecha y nivel, e incluye la salida del servidor remoto). Si falla al abrirlo, avisa y continúa solo con consola |
 | `server.known.hosts` | **Opcional.** Archivo `known_hosts` para verificar la huella del servidor SSH. Si no se define, no se verifica (`StrictHostKeyChecking=no`) y se imprime un aviso |
 
 `server.port` y `server.script.dir` son obligatorias: si faltan, `LoadContext` detiene el pipeline indicando cuál.

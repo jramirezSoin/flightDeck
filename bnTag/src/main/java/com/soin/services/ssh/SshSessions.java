@@ -1,5 +1,7 @@
 package com.soin.services.ssh;
 
+import java.util.logging.Logger;
+
 import java.io.File;
 
 import com.jcraft.jsch.JSch;
@@ -7,6 +9,8 @@ import com.jcraft.jsch.Session;
 
 /** Crea sesiones SSH con la verificación de host key configurada en un solo lugar. */
 final class SshSessions {
+
+    private static final Logger LOG = Logger.getLogger(SshSessions.class.getName());
 
     private SshSessions() {
     }
@@ -45,7 +49,7 @@ final class SshSessions {
             session.setConfig("StrictHostKeyChecking", "yes");
 
         } else {
-            System.out.println("AVISO: server.known.hosts no está definida; no se verifica la huella del servidor SSH");
+            LOG.warning("server.known.hosts no está definida; no se verifica la huella del servidor SSH");
             session = jsch.getSession(username, host, port);
             session.setConfig("StrictHostKeyChecking", "no");
         }

@@ -2,8 +2,12 @@ package com.soin.pipeline;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Pipeline {
+
+    private static final Logger LOG = Logger.getLogger(Pipeline.class.getName());
 
     private final List<PipelineStep> steps = new ArrayList<>();
 
@@ -23,27 +27,17 @@ public class Pipeline {
         for (PipelineStep step : steps) {
 
             String stepName = step.getClass().getSimpleName();
-            System.out.println(
-                "------------------------------------------------"
-            );
-            System.out.println(
-                "Ejecutando: " + stepName
-            );
+            LOG.info("------------------------------------------------");
+            LOG.info("Ejecutando: " + stepName);
 
             StepResult result = step.execute(context);
 
-            System.out.println(
-                stepName + " -> "
-                + result.getStatus()
-                + " : "
-                + result.getMessage()
-            );
+            Level level = result.isSuccess() || result.isSkipped() ? Level.INFO : Level.SEVERE;
+            LOG.log(level, stepName + " -> " + result.getStatus() + " : " + result.getMessage());
 
             if (!result.isSuccess() && !result.isSkipped()) {
 
-                System.out.println(
-                    "Pipeline detenido en: " + stepName
-                );
+                LOG.severe("Pipeline detenido en: " + stepName);
 
                 return false;
             }

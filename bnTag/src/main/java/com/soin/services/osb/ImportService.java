@@ -1,9 +1,13 @@
 package com.soin.services.osb;
 
+import java.util.logging.Logger;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class ImportService {
+
+    private static final Logger LOG = Logger.getLogger(ImportService.class.getName());
 
     public static void importConfigJar(String configXmlPath) throws Exception {
 
@@ -29,6 +33,6 @@ public class ImportService {
             throw new RuntimeException(cause);
         }
 
-        System.out.println("Import exitoso.");
+        LOG.info("Import exitoso.");
     }
 }

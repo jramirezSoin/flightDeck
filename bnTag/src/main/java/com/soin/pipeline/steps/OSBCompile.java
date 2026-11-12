@@ -1,5 +1,7 @@
 package com.soin.pipeline.steps;
 
+import java.util.logging.Logger;
+
 
 import com.soin.pipeline.PipelineContext;
 import com.soin.pipeline.PipelineStep;
@@ -8,6 +10,8 @@ import com.soin.services.osb.ImportService;
 import com.soin.services.osb.ConfigJarXmlGenerator;
 
 public class OSBCompile implements PipelineStep {
+
+    private static final Logger LOG = Logger.getLogger(OSBCompile.class.getName());
 
     @Override
     public StepResult execute(PipelineContext context) {
@@ -18,7 +22,7 @@ public class OSBCompile implements PipelineStep {
 
         try {
 
-            System.out.println("Compilando OSB...");
+            LOG.info("Compilando OSB...");
 
             ConfigJarXmlGenerator.generate(
                     context.getOsbPath() + context.getArchivo(),

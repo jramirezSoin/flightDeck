@@ -21,6 +21,10 @@ server.remote.path=/u01/scripts/installBN/deploys/
 #directorio remoto donde estan installOSB.sh e installSOA.sh
 server.script.dir=/u01/scripts/bin/
 
+#OPCIONAL. Guarda el log tambien en un archivo (se agrega al final en cada ejecucion).
+#Si no se define, el log sale solo por consola. Se crean los directorios que falten.
+#log.file=C:/Users/${BN_WIN_USER}/Documents/bntag/bntag.log
+
 #OPCIONAL. Archivo known_hosts para verificar la huella del servidor SSH.
 #Si no se define NO se verifica (StrictHostKeyChecking=no). Para activarla, registrar
 #el host una vez (ssh-keyscan <host> >> <ruta>) y descomentar:

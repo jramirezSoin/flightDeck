@@ -1,5 +1,7 @@
 package com.soin.services.git;
 
+import java.util.logging.Logger;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -8,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class GitService {
+
+    private static final Logger LOG = Logger.getLogger(GitService.class.getName());
 
     /**
      * Devuelve los recursos con cambios (git status) que pertenecen al OSB indicado,
@@ -21,8 +25,8 @@ public class GitService {
      * @throws Exception si git no se puede ejecutar o termina con error
      */
     public static ArrayList<String> getStatus(String gitPath, String OSB) throws Exception {
-        System.out.println("Git Path: " + gitPath);
-        System.out.println("OSB: " + OSB);
+        LOG.info("Git Path: " + gitPath);
+        LOG.info("OSB: " + OSB);
 
         ProcessBuilder pb = new ProcessBuilder("git", "status", "--porcelain", "-z", "--untracked-files=all");
         pb.directory(new File(gitPath));
@@ -69,7 +73,7 @@ public class GitService {
             }
 
             if (x == 'D' || y == 'D') {
-                System.out.println("Omitido (borrado): " + path);
+                LOG.info("Omitido (borrado): " + path);
                 continue;
             }
 
@@ -80,7 +84,7 @@ public class GitService {
             }
 
             String resource = "**/" + String.join("/", Arrays.copyOfRange(segments, k + 1, segments.length));
-            System.out.println(resource);
+            LOG.info(resource);
             statusLines.add(resource);
         }
 

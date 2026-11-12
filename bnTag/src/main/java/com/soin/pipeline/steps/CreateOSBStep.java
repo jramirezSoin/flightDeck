@@ -1,5 +1,7 @@
 package com.soin.pipeline.steps;
 
+import java.util.logging.Logger;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,6 +13,8 @@ import com.soin.services.osb.CreateOSB;
 
 public class CreateOSBStep implements PipelineStep {
 
+    private static final Logger LOG = Logger.getLogger(CreateOSBStep.class.getName());
+
     @Override
     public StepResult execute(PipelineContext context) {
         try {
@@ -21,7 +25,7 @@ public class CreateOSBStep implements PipelineStep {
                 return StepResult.failed("OSB ya existe en " + context.getOsbPath() + ", no se creará nuevamente");
             }
 
-            System.out.println("Creando OSB en " + context.getOsbPath() + "...");
+            LOG.info("Creando OSB en " + context.getOsbPath() + "...");
             CreateOSB.create(context.getArchivo(), carpeta, context.isRest());
 
             return StepResult.success("OSB creado correctamente en " + context.getOsbPath());
