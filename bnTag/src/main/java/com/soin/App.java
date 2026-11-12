@@ -4,29 +4,53 @@ import com.soin.pipeline.Pipeline;
 import com.soin.pipeline.PipelineContext;
 import com.soin.pipeline.steps.*;
 
-
-
 /**
- * Hello world!
+ * Punto de entrada de bnTag: arma el pipeline según los parámetros y lo ejecuta.
+ * Termina con exit code 1 si los parámetros son inválidos o algún paso falla.
  */
 public class App {
-    public static void main(String[] args) {
 
+    private static void printUsage() {
+        System.out.println("Uso: bntag.sh -osb <OSB name> [--project] [--skipCompile] [--skipImport]");
+        System.out.println("     bntag.sh -osb <OSB name> --create [--rest]");
+        System.out.println("     bntag.sh -soa <SOA name> [--skipImport]");
+        System.out.println("-osb <nombre>: Proyecto OSB a procesar");
+        System.out.println("-soa <nombre>: Proyecto SOA a procesar");
+        System.out.println("--project: Indica que se está ejecutando un OSB completo y no solo resources individuales de git status");
+        System.out.println("--skipCompile: Omite la compilación durante la ejecución");
+        System.out.println("--skipImport: Omite la importación durante la ejecución");
+        System.out.println("--create: Crea un proyecto OSB nuevo en el workspace local a partir de la plantilla");
+        System.out.println("--rest: Con --create, incluye el ProxyService REST");
+    }
+
+    private static void fail(String message) {
+        System.out.println(message);
+        printUsage();
+        System.exit(1);
+    }
+
+    public static void main(String[] args) {
 
         PipelineContext context = new PipelineContext();
 
-        try {            
+        try {
 
             for (int i = 0; i < args.length; i++) {
 
                 switch (args[i]) {
 
                     case "-osb":
+                        if (i + 1 >= args.length) {
+                            fail("Falta el nombre del OSB después de -osb");
+                        }
                         context.setOSB(true);
                         context.setArchivo(args[++i]);
                         break;
 
                     case "-soa":
+                        if (i + 1 >= args.length) {
+                            fail("Falta el nombre del SOA después de -soa");
+                        }
                         context.setSOA(true);
                         context.setArchivo(args[++i]);
                         break;
@@ -52,42 +76,36 @@ public class App {
                         break;
 
                     default:
-                        System.out.println("Parámetro desconocido: " + args[i]);
-                        System.out.println("Uso: bntag.sh [-osb <OSB name>] [-soa <SOA name>] [--project] [--skipCompile] [--skipImport]");
-                        System.out.println("--project: Indica que se está ejecutando un OSB completo y no solo resources individuales de git status");
-                        System.out.println("--skipCompile: Omite la compilación durante la ejecución");
-                        System.out.println("--skipImport: Omite la importación durante la ejecución");
-                        System.out.println("--create: Indica que se debe crear el proyecto en el servidor remoto");
-                        System.out.println("--rest: Indica que se debe crear ProxyService REST");
-                        System.exit(1);
-                        return;
+                        fail("Parámetro desconocido: " + args[i]);
                 }
             }
-            
+
+            if (context.isOSB() && context.isSOA()) {
+                fail("No se puede usar -osb y -soa en la misma ejecución");
+            }
+
             Pipeline pipeline = new Pipeline();
 
-            if(context.isSOA()) {
+            if (context.isSOA()) {
                 pipeline
                     .addStep(new LoadContext())
-                    .addStep(new SOAUploadFileStep())
-                    .addStep(new SOAImport());
-            } 
-            else if(context.isOSB() && context.isCreate()) {
+                    .addStep(new UploadFileStep(DeployTarget.SOA))
+                    .addStep(new ImportStep(DeployTarget.SOA));
+            }
+            else if (context.isOSB() && context.isCreate()) {
                 pipeline
                     .addStep(new LoadContext())
                     .addStep(new CreateOSBStep());
             }
-            else if(context.isOSB()) {
-            pipeline
-                .addStep(new LoadContext())
-                .addStep(new GitStatusStep())
-                .addStep(new OSBCompile())
-                .addStep(new OSBUploadFileStep())
-                .addStep(new OSBImport());
+            else if (context.isOSB()) {
+                pipeline
+                    .addStep(new LoadContext())
+                    .addStep(new GitStatusStep())
+                    .addStep(new OSBCompile())
+                    .addStep(new UploadFileStep(DeployTarget.OSB))
+                    .addStep(new ImportStep(DeployTarget.OSB));
             } else {
-                System.out.println("No se especificó ni un OSB ni un SOA para ejecutar el pipeline");
-                System.exit(1);
-                return;
+                fail("No se especificó ni un OSB ni un SOA para ejecutar el pipeline");
             }
 
             if (!pipeline.execute(context)) {

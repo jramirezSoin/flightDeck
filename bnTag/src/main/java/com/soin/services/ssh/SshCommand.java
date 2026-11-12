@@ -1,15 +1,21 @@
 package com.soin.services.ssh;
 
 import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
 public class SshCommand {
+
+    /** Tiempo máximo para establecer la conexión SSH. */
+    private static final int CONNECT_TIMEOUT_MS = 30_000;
+
+    /** Tiempo máximo que se espera a que termine el comando remoto (30 min). */
+    private static final long COMMAND_TIMEOUT_MS = 30L * 60 * 1000;
 
     /** Entrecomilla un argumento para el shell remoto (comillas simples, escapando las internas). */
     public static String shellQuote(String value) {
@@ -21,81 +27,87 @@ public class SshCommand {
             int port,
             String username,
             String privateKey,
+            String knownHosts,
             String command) throws Exception {
 
-        JSch jsch = new JSch();
-        jsch.addIdentity(privateKey);
+        Session session = SshSessions.create(host, port, username, privateKey, knownHosts);
 
-        Session session = jsch.getSession(username, host, port);
+        ChannelExec channel = null;
 
-        // Para pruebas
-        session.setConfig("StrictHostKeyChecking", "no");
+        try {
+            session.connect(CONNECT_TIMEOUT_MS);
 
-        session.connect();
+            channel = (ChannelExec) session.openChannel("exec");
 
-        ChannelExec channel = (ChannelExec) session.openChannel("exec");
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            ByteArrayOutputStream error = new ByteArrayOutputStream();
 
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        ByteArrayOutputStream error = new ByteArrayOutputStream();
+            // STDOUT/STDERR en tiempo real + guardar resultado
+            channel.setOutputStream(new TeeOutputStream(output, System.out));
+            channel.setErrStream(new TeeOutputStream(error, System.err));
 
-        // STDOUT en tiempo real + guardar resultado
-        channel.setOutputStream(new OutputStream() {
+            channel.setCommand(command);
+            channel.connect();
 
-            @Override
-            public void write(int b) throws IOException {
-                output.write(b);
-                System.out.print((char) b);
-                System.out.flush();
+            long deadline = System.currentTimeMillis() + COMMAND_TIMEOUT_MS;
+
+            while (!channel.isClosed()) {
+                if (System.currentTimeMillis() > deadline) {
+                    throw new RuntimeException(
+                            "Timeout: el comando remoto no terminó en "
+                            + (COMMAND_TIMEOUT_MS / 60000) + " minutos");
+                }
+                Thread.sleep(100);
             }
 
-            @Override
-            public void write(byte[] b, int off, int len) throws IOException {
-                output.write(b, off, len);
-                System.out.print(new String(b, off, len, StandardCharsets.UTF_8));
-                System.out.flush();
-            }
-        });
+            int exitCode = channel.getExitStatus();
 
-        // STDERR en tiempo real + guardar resultado
-        channel.setErrStream(new OutputStream() {
+            String stdout = output.toString(StandardCharsets.UTF_8.name());
+            String stderr = error.toString(StandardCharsets.UTF_8.name());
 
-            @Override
-            public void write(int b) throws IOException {
-                error.write(b);
-                System.err.print((char) b);
-                System.err.flush();
+            if (exitCode != 0) {
+                throw new RuntimeException(
+                        "Comando falló. Exit code: " + exitCode
+                        + "\nSTDERR: " + stderr
+                );
             }
 
-            @Override
-            public void write(byte[] b, int off, int len) throws IOException {
-                error.write(b, off, len);
-                System.err.print(new String(b, off, len, StandardCharsets.UTF_8));
-                System.err.flush();
+            return stdout;
+
+        } finally {
+            if (channel != null) {
+                channel.disconnect();
             }
-        });
+            session.disconnect();
+        }
+    }
 
-        channel.setCommand(command);
-        channel.connect();
+    /**
+     * Escribe los bytes tal cual a un buffer y a una consola. Al pasar bytes crudos
+     * (no chars) los caracteres UTF-8 multibyte se muestran bien aunque lleguen partidos.
+     */
+    private static class TeeOutputStream extends OutputStream {
 
-        while (!channel.isClosed()) {
-            Thread.sleep(100);
+        private final ByteArrayOutputStream buffer;
+        private final PrintStream console;
+
+        TeeOutputStream(ByteArrayOutputStream buffer, PrintStream console) {
+            this.buffer = buffer;
+            this.console = console;
         }
 
-        int exitCode = channel.getExitStatus();
-
-        channel.disconnect();
-        session.disconnect();
-
-        String stdout = output.toString(StandardCharsets.UTF_8.name());
-        String stderr = error.toString(StandardCharsets.UTF_8.name());
-
-        if (exitCode != 0) {
-            throw new RuntimeException(
-                    "Comando falló. Exit code: " + exitCode
-                    + "\nSTDERR: " + stderr
-            );
+        @Override
+        public void write(int b) throws IOException {
+            buffer.write(b);
+            console.write(b);
+            console.flush();
         }
 
-        return stdout;
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            buffer.write(b, off, len);
+            console.write(b, off, len);
+            console.flush();
+        }
     }
 }

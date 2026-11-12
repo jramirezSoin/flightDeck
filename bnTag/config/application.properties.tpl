@@ -10,14 +10,18 @@ soa.dir=${BN_WORKSPACE_ROOT}/BNCR_SOA_WORKSPACE/
 dest.jar.dir=C:/Users/${BN_WIN_USER}/Documents/OSB_Resources/
 
 #Clave de acceso a servidor linux
-server.key=C:/Users/${BN_WIN_USER}/Documents/installBN/id_rsa
+server.key=C:/Users/${BN_WIN_USER}/Documents/id_rsa
 
 
 server.host=${SOA_HOSTNAME}
 server.port=22
 server.user=oracle
 server.remote.path=/u01/scripts/installBN/deploys/
-server.script.path=/u01/scripts/antDeploy/
 
 #directorio remoto donde estan installOSB.sh e installSOA.sh
 server.script.dir=/u01/scripts/bin/
+
+#OPCIONAL. Archivo known_hosts para verificar la huella del servidor SSH.
+#Si no se define NO se verifica (StrictHostKeyChecking=no). Para activarla, registrar
+#el host una vez (ssh-keyscan <host> >> <ruta>) y descomentar:
+#server.known.hosts=C:/Users/${BN_WIN_USER}/.ssh/known_hosts

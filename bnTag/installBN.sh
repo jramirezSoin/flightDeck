@@ -10,9 +10,6 @@ if [ ! -f config/application.properties ]; then
     bash ./generate-config.sh || exit 1
 fi
 
-export ORACLE_HOME="/c/Oracle/Middleware/Oracle_Home"
-export MW_HOME="${ORACLE_HOME}"
-
 JAVA_OPTS=$(envsubst < java_opts.txt | tr '\\' '/' | sed 's|C:|/c|g')
 CLASSPATH="."
 if [[ " $* " == *" -osb "* && " $* " != *" --skipCompile "* ]]; then
@@ -20,4 +17,4 @@ if [[ " $* " == *" -osb "* && " $* " != *" --skipCompile "* ]]; then
     CLASSPATH=$(envsubst < classpath.txt | tr '\\' '/' | sed 's|C:|/c|g')
 fi
 echo "CLASSPATH: $CLASSPATH"
-java $JAVA_OPTS -cp "target/installbn-1.0.0.jar:${CLASSPATH}" com.soin.App $@
+java $JAVA_OPTS -cp "target/installbn-1.0.0.jar:${CLASSPATH}" com.soin.App "$@"

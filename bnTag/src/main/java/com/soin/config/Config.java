@@ -1,6 +1,8 @@
 package com.soin.config;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -9,15 +11,22 @@ public class Config {
     public static Properties prop = new Properties();
     final static String propertiesFilePath = "config/application.properties";
 
-    public static void loadProperties() {
-        System.out.println("Cargando propiedades desde: " + propertiesFilePath);
-        try (InputStream input = new FileInputStream(propertiesFilePath)) {
-            prop.load(input);
+    /**
+     * Carga application.properties.
+     *
+     * @throws IOException si el archivo no existe o no se puede leer
+     */
+    public static void loadProperties() throws IOException {
+        File file = new File(propertiesFilePath);
+        System.out.println("Cargando propiedades desde: " + file.getAbsolutePath());
 
-        } catch (Exception e) {
-            System.err.println("Error cargando propiedades: " + e.getMessage());
-            e.printStackTrace();
+        try (InputStream input = new FileInputStream(file)) {
+            prop.load(input);
+        } catch (IOException e) {
+            throw new IOException(
+                    "No se pudo leer " + file.getAbsolutePath()
+                    + " (¿se generó con generate-config.sh?): " + e.getMessage(), e);
         }
     }
-    
+
 }

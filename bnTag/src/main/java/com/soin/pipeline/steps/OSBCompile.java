@@ -4,21 +4,16 @@ package com.soin.pipeline.steps;
 import com.soin.pipeline.PipelineContext;
 import com.soin.pipeline.PipelineStep;
 import com.soin.pipeline.StepResult;
-import com.soin.pipeline.StepStatus;
 import com.soin.services.osb.ImportService;
 import com.soin.services.osb.ConfigJarXmlGenerator;
 
 public class OSBCompile implements PipelineStep {
 
-@Override
+    @Override
     public StepResult execute(PipelineContext context) {
 
-        if(!context.isOSB() || !context.isCompile()) {
-            System.out.println("Compilación de OSB no ejecutado porque no es un OSB o se indicó que no se compile");
-            return new StepResult(
-                StepStatus.SKIPPED,
-                "Compilación de OSB no ejecutado porque no es un OSB o se indicó que no se compile"
-            );
+        if (!context.isCompile()) {
+            return StepResult.skipped("Compilación de OSB no ejecutada porque se indicó --skipCompile");
         }
 
         try {
@@ -34,20 +29,12 @@ public class OSBCompile implements PipelineStep {
 
             ImportService.importConfigJar("export-resource.xml");
 
-            return new StepResult(
-                StepStatus.SUCCESS,
-                "OSB compilado correctamente"
-            );
-
-            
+            return StepResult.success("OSB compilado correctamente");
 
         } catch (Exception e) {
-
-            return new StepResult(
-                StepStatus.FAILED,
-                "Error compilando OSB: " + e.getMessage()
-            );
+            return StepResult.failed(
+                "Error compilando OSB: " + (e.getMessage() != null ? e.getMessage() : e.toString()));
         }
     }
-    
+
 }

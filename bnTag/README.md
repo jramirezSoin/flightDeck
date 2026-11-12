@@ -12,6 +12,7 @@ Los datos personales no se versionan. `config/application.properties` se **gener
 |----------|-------------|---------|
 | `BN_WORKSPACE_ROOT` | Carpeta raíz que contiene `BNCR_OSB_WORKSPACE` y `BNCR_SOA_WORKSPACE`. Usar `/` y sin `/` final. | `E:/Azure/TP_SOA.joseph.ramirez` |
 | `SOA_HOSTNAME` | Host del servidor Linux al que se suben e importan los artefactos (`server.host`). | `soa-host.example.com` |
+| `ORACLE_HOME` | Instalación de Oracle. `installBN.sh` ya no la define: `classpath.txt` y `java_opts.txt` la referencian y se resuelven con `envsubst`. Usar `/` en la ruta. | `/c/Oracle/Middleware/Oracle_Home` |
 
 ### Con valor por defecto
 
@@ -20,9 +21,11 @@ Los datos personales no se versionan. `config/application.properties` se **gener
 | `BN_WIN_USER` | Usuario de Windows, usado en `C:/Users/<usuario>/...` (carpeta de JARs y llave SSH). | Variable `USERNAME` de Windows |
 | `BNTAG_HOME` | Directorio de `bnTag`. Solo hace falta si `installBN.sh` se copió fuera del proyecto. | Directorio donde vive `installBN.sh` |
 
-### Fijada por el script
+### Opcional
 
-`installBN.sh` exporta `ORACLE_HOME` y `MW_HOME` (hoy `/c/Oracle/Middleware/Oracle_Home`) y los usa para armar `classpath.txt` y `java_opts.txt`. No hay que definirlas, pero si Oracle está en otra ruta hay que editar el script.
+| Variable | Descripción |
+|----------|-------------|
+| `MW_HOME` | Antes `installBN.sh` la exportaba con el mismo valor de `ORACLE_HOME`; ya no. Los archivos del proyecto no la referencian, pero si las herramientas de Oracle (ConfigJar/WebLogic) la necesitan hay que definirla. |
 
 ## Instalación
 
@@ -33,6 +36,7 @@ Requisitos: Java 8, Maven, Git Bash con `envsubst`, y la llave SSH al servidor (
    ```bash
    export BN_WORKSPACE_ROOT=E:/Azure/TP_SOA.joseph.ramirez
    export SOA_HOSTNAME=<host del servidor>
+   export ORACLE_HOME=/c/Oracle/Middleware/Oracle_Home
    # opcional: export BN_WIN_USER=<usuario de Windows>
    ```
 
@@ -56,7 +60,7 @@ Para regenerar el archivo manualmente: borrar `config/application.properties` y 
 | `server.host`, `server.port`, `server.user` | Conexión SSH al servidor |
 | `server.remote.path` | Carpeta remota donde se suben los JARs |
 | `server.script.dir` | Carpeta remota de `installOSB.sh` e `installSOA.sh` |
-| `server.script.path` | Cargada pero sin uso actual |
+| `server.known.hosts` | **Opcional.** Archivo `known_hosts` para verificar la huella del servidor SSH. Si no se define, no se verifica (`StrictHostKeyChecking=no`) y se imprime un aviso |
 
 `server.port` y `server.script.dir` son obligatorias: si faltan, `LoadContext` detiene el pipeline indicando cuál.
 

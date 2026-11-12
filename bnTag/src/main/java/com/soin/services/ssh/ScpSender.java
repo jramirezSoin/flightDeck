@@ -1,38 +1,37 @@
 package com.soin.services.ssh;
 
 import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
 public class ScpSender {
+
+    /** Tiempo máximo para establecer la conexión SSH. */
+    private static final int CONNECT_TIMEOUT_MS = 30_000;
 
     public static void sendFile(
             String host,
             int port,
             String username,
             String privateKey,
+            String knownHosts,
             String localFile,
             String remoteFile) throws Exception {
 
-        JSch jsch = new JSch();
+        Session session = SshSessions.create(host, port, username, privateKey, knownHosts);
 
-        // Cargar id_rsa
-        jsch.addIdentity(privateKey);
-
-        Session session = jsch.getSession(username, host, port);
-
-        // Solo para pruebas. En producción deberíamos validar known_hosts.
-        session.setConfig("StrictHostKeyChecking", "no");
-
-        session.connect();
-
-        ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
-        channel.connect();
+        ChannelSftp channel = null;
 
         try {
+            session.connect(CONNECT_TIMEOUT_MS);
+
+            channel = (ChannelSftp) session.openChannel("sftp");
+            channel.connect(CONNECT_TIMEOUT_MS);
+
             channel.put(localFile, remoteFile);
         } finally {
-            channel.disconnect();
+            if (channel != null) {
+                channel.disconnect();
+            }
             session.disconnect();
         }
     }

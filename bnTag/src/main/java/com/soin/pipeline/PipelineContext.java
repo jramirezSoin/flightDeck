@@ -7,13 +7,13 @@ public class PipelineContext {
     private String host;
     private int port;
     private String scriptDir;
+    private String knownHosts;
     private String username;
     private String privateKey;
 
     private String localFile;
     private String remoteFile;
 
-    private String commandPath;
     private String osbPath;
     private String soaPath;
 
@@ -97,6 +97,15 @@ public class PipelineContext {
         this.scriptDir = scriptDir;
     }
 
+    /** Ruta del known_hosts para verificar el servidor SSH; null = no se verifica. */
+    public String getKnownHosts() {
+        return knownHosts;
+    }
+
+    public void setKnownHosts(String knownHosts) {
+        this.knownHosts = knownHosts;
+    }
+
     public String getUsername() {
         return username;
     }
@@ -133,17 +142,6 @@ public class PipelineContext {
             remoteFile += "/";
         }
         this.remoteFile = remoteFile;
-    }
-
-    public String getCommandPath() {
-        return commandPath;
-    }
-
-    public void setCommandPath(String commandPath) {
-        if (!commandPath.endsWith("/")) {
-            commandPath += "/";
-        }
-        this.commandPath = commandPath;
     }
 
     public String getOsbPath() {
