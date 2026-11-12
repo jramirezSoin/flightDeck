@@ -13,7 +13,8 @@ fi
 JAVA_OPTS=$(envsubst < java_opts.txt | tr '\\' '/' | sed 's|C:|/c|g')
 CLASSPATH="."
 if [[ " $* " == *" -osb "* && " $* " != *" --skipCompile "* ]]; then
-    rm -rf /c/Temp/osbinstance
+    # --create no compila: no limpiar el java.io.tmpdir (C:/Temp/osbinstance)
+    [[ " $* " != *" --create "* ]] && rm -rf /c/Temp/osbinstance
     CLASSPATH=$(envsubst < classpath.txt | tr '\\' '/' | sed 's|C:|/c|g')
 fi
 #echo "CLASSPATH: $CLASSPATH"

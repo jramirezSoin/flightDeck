@@ -15,6 +15,9 @@ public class CreateOSB {
 
     public static void create(String osbName, Path destination, boolean isRest) throws IOException {
 
+        // createTempDirectory no crea el directorio base; java.io.tmpdir (java_opts.txt) puede no existir
+        // porque el lanzador lo limpia antes de cada ejecución.
+        Files.createDirectories(Paths.get(System.getProperty("java.io.tmpdir")));
         Path tempDirectory = Files.createTempDirectory("osb-template-");
 
         try {

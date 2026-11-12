@@ -131,7 +131,8 @@ def build_command(args: list[str]) -> tuple[list[str], Path, bool]:
 
     classpath = os.pathsep.join([f"target/{JAR_NAME}", extra_cp])
     cmd = [java, *java_opts, "-cp", classpath, "com.soin.App", *args]
-    return cmd, home, needs_oracle
+    # Crear un OSB no compila: no hace falta limpiar C:/Temp/osbinstance (y es su java.io.tmpdir).
+    return cmd, home, needs_oracle and "--create" not in args
 
 
 class Job:
