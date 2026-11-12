@@ -26,7 +26,7 @@ Los datos personales no se versionan. `config/application.properties` se **gener
 
 ## Instalación
 
-Requisitos: Java 8, Maven, Git Bash con `make` y `envsubst`, y la llave SSH al servidor (ruta definida en `server.key`, por defecto `C:/Users/<BN_WIN_USER>/Documents/installBN/id_rsa`).
+Requisitos: Java 8, Maven, Git Bash con `envsubst`, y la llave SSH al servidor (ruta definida en `server.key`, por defecto `C:/Users/<BN_WIN_USER>/Documents/installBN/id_rsa`).
 
 1. Definir las variables de ambiente (ver arriba), por ejemplo en `~/.bash_profile`:
 
@@ -42,9 +42,9 @@ Requisitos: Java 8, Maven, Git Bash con `make` y `envsubst`, y la llave SSH al s
    mvn package
    ```
 
-3. Ejecutar `installBN.sh`. Si `config/application.properties` no existe, el script lo genera con `make config` y falla indicando qué variable falta.
+3. Ejecutar `installBN.sh`. Si `config/application.properties` no existe, el script lo genera con `generate-config.sh` y falla indicando qué variable falta.
 
-Para regenerar el archivo manualmente: `make clean && make config`.
+Para regenerar el archivo manualmente: borrar `config/application.properties` y ejecutar `./generate-config.sh`.
 
 ## Configuración (`application.properties`)
 

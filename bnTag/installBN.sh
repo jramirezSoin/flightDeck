@@ -6,8 +6,8 @@ BNTAG_HOME="${BNTAG_HOME:-$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")}"
 cd "$BNTAG_HOME" || { echo "ERROR: no se pudo entrar a $BNTAG_HOME" >&2; exit 1; }
 
 if [ ! -f config/application.properties ]; then
-    echo "config/application.properties no existe, generándolo con make..."
-    make config/application.properties || exit 1
+    echo "config/application.properties no existe, generándolo..."
+    bash ./generate-config.sh || exit 1
 fi
 
 export ORACLE_HOME="/c/Oracle/Middleware/Oracle_Home"

@@ -1,5 +1,5 @@
 #Plantilla de application.properties. NO editar application.properties a mano:
-#se genera con "make" (ver Makefile) a partir de variables de ambiente.
+#se genera con generate-config.sh a partir de variables de ambiente.
 #Variables: BN_WORKSPACE_ROOT, BN_WIN_USER, SOA_HOSTNAME
 
 #ruta de los workspaces de OSB y SOA
