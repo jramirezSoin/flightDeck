@@ -144,10 +144,19 @@ def status(path: str) -> dict:
     return {"path": str(repo), "root": top, **info, "files": files}
 
 
+def _toplevel(repo: Path) -> Path:
+    """Raíz del repo. `git status` da las rutas relativas a la raíz, así que add/restore
+    deben ejecutarse desde ahí (la ruta indicada puede ser una subcarpeta del repo)."""
+    code, top = _run(repo, ["rev-parse", "--show-toplevel"], check=False)
+    if code != 0:
+        raise GitError(f"No es un repositorio git: {repo}")
+    return Path(top)
+
+
 def add(path: str, paths) -> str:
     repo, files = _repo_dir(path), _clean_paths(paths)
     with _lock:
-        _, out = _run(repo, ["add", "--", *files])
+        _, out = _run(_toplevel(repo), ["add", "--", *files])
     return out
 
 
@@ -156,7 +165,7 @@ def restore(path: str, paths, staged: bool) -> str:
     repo, files = _repo_dir(path), _clean_paths(paths)
     args = ["restore", "--staged"] if staged else ["restore"]
     with _lock:
-        _, out = _run(repo, [*args, "--", *files])
+        _, out = _run(_toplevel(repo), [*args, "--", *files])
     return out
 
 
