@@ -5,3 +5,7 @@ bnTag/config/application.properties
 bnTag/target/
 # llave de cifrado del dominio WebLogic
 bnTag/security/
+# Skills de agentes instaladas con npx skills (terceros)
+.agents/
+.claude/
+skills-lock.json
