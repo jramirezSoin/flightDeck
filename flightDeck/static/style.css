@@ -322,3 +322,39 @@ input[aria-invalid="true"] { border-color: var(--fd-alarm); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+
+/* ---------- Vista Git ---------- */
+/* Pre-vuelo, Pasos y Cancelar son de bnTag; no aplican aquí. */
+body[data-view="git"] .preflight,
+body[data-view="git"] .preflight-detail,
+body[data-view="git"] #panel-steps,
+body[data-view="git"] #cancel { display: none; }
+
+.field-row-end { align-items: flex-end; }
+textarea {
+  width: 100%; padding: var(--fd-s-2) var(--fd-s-3); resize: vertical; min-height: 64px;
+  background: var(--fd-deck-2); border: 1px solid var(--fd-hairline-strong); border-radius: var(--fd-r-sm);
+  color: var(--fd-ink); font: inherit; font-size: var(--fd-t-3);
+}
+textarea:focus-visible { outline: 2px solid var(--fd-go); outline-offset: 0; border-color: var(--fd-go); }
+
+.git-branch { margin-top: var(--fd-s-2); font: 500 var(--fd-t-2) var(--fd-mono); color: var(--fd-ink-2); white-space: pre; overflow-wrap: anywhere; }
+.git-count { color: var(--fd-ink-3); font-weight: 400; }
+.git-all { display: flex; align-items: center; gap: var(--fd-s-2); margin-bottom: var(--fd-s-2); cursor: pointer; }
+.git-files { list-style: none; padding: 0; max-height: 280px; overflow: auto; background: var(--fd-deck-2); border-radius: var(--fd-r-sm); }
+.git-files li { display: flex; align-items: center; gap: var(--fd-s-2); padding: 4px var(--fd-s-3); }
+.git-files li:hover { background: var(--fd-deck-3); }
+.git-files label { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--fd-s-2); cursor: pointer; color: var(--fd-ink); }
+.git-name { font: 400 var(--fd-t-2) var(--fd-mono); overflow-wrap: anywhere; }
+.git-empty { color: var(--fd-ink-3); }
+.pill { flex: none; padding: 1px 8px; border-radius: 999px; font-size: var(--fd-t-1); font-weight: 600; background: var(--fd-deck-3); color: var(--fd-ink-2); }
+.pill-staged { background: var(--fd-go-tint); color: var(--fd-go); }
+.pill-work { color: var(--fd-amber); }
+.pill-new { color: var(--fd-ink-2); }
+
+.git-actions { display: flex; gap: var(--fd-s-2); flex-wrap: wrap; margin-top: var(--fd-s-4); }
+.git-actions.actions { padding-top: var(--fd-s-4); }
+.git-actions .btn-primary { width: auto; flex: 1; }
+.git-commit { margin-top: var(--fd-s-4); }
+.btn-danger { color: var(--fd-alarm); }
+.btn-danger:hover:not(:disabled) { border-color: var(--fd-alarm); }

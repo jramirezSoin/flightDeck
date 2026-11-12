@@ -32,6 +32,8 @@ function showView(name) {
     b.classList.toggle("active", active);
     if (active) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
   });
+  document.body.dataset.view = name;  // el CSS oculta pre-vuelo/pasos en la vista Git
+  if (name === "git" && !gitLoaded) gitRefresh();
 }
 document.querySelectorAll(".nav-item").forEach((b) => b.addEventListener("click", () => showView(b.dataset.view)));
 
@@ -283,3 +285,165 @@ $("cancel").addEventListener("click", async () => {
   $("cancel").disabled = true;
   await post(`/api/jobs/${currentJob}/cancel`);
 });
+
+// --- Vista Git ---------------------------------------------------------------
+let gitLoaded = false;
+let gitBusy = false;
+let gitFiles = [];
+const gitSel = new Set();
+
+const GIT_CODE = { M: "Modificado", A: "Agregado", D: "Borrado", R: "Renombrado", C: "Copiado", T: "Tipo", U: "Conflicto" };
+const gitPath = () => $("gitPath").value.trim();
+const isUntracked = (f) => f.x === "?" && f.y === "?";
+const isStaged = (f) => !isUntracked(f) && f.x !== " " && f.x !== "!";
+const selectedFiles = () => gitFiles.filter((f) => gitSel.has(f.path));
+
+function gitError(text) {
+  const el = $("gitError");
+  el.textContent = text || "";
+  el.hidden = !text;
+}
+
+function renderGit(data) {
+  gitFiles = data.files;
+  [...gitSel].forEach((p) => { if (!gitFiles.some((f) => f.path === p)) gitSel.delete(p); });
+  $("gitPath").value = data.path;
+
+  const b = $("gitBranch");
+  const parts = [data.branch || "(sin rama)"];
+  if (data.upstream) parts.push("→ " + data.upstream);
+  if (data.ahead) parts.push(`↑${data.ahead} por enviar`);
+  if (data.behind) parts.push(`↓${data.behind} por recibir`);
+  b.textContent = parts.join("  ");
+  b.hidden = false;
+
+  $("gitCount").textContent = gitFiles.length ? `(${gitFiles.length})` : "";
+  const ul = $("gitFiles");
+  ul.innerHTML = "";
+  if (!gitFiles.length) {
+    const li = document.createElement("li");
+    li.className = "git-empty";
+    li.textContent = "Sin cambios.";
+    ul.appendChild(li);
+  }
+  gitFiles.forEach((f) => {
+    const li = document.createElement("li");
+    const label = document.createElement("label");
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.checked = gitSel.has(f.path);
+    cb.addEventListener("change", () => {
+      if (cb.checked) gitSel.add(f.path); else gitSel.delete(f.path);
+      gitUpdateButtons();
+    });
+    const name = document.createElement("span");
+    name.className = "git-name";
+    name.textContent = f.orig ? `${f.orig} → ${f.path}` : f.path;
+    label.append(cb, name);
+    li.appendChild(label);
+    const tags = [];
+    if (isUntracked(f)) tags.push(["new", "Nuevo"]);
+    else {
+      if (isStaged(f)) tags.push(["staged", "Stage: " + (GIT_CODE[f.x] || f.x)]);
+      if (f.y !== " ") tags.push(["work", GIT_CODE[f.y] || f.y]);
+    }
+    tags.forEach(([cls, text]) => {
+      const t = document.createElement("span");
+      t.className = "pill pill-" + cls;
+      t.textContent = text;
+      li.appendChild(t);
+    });
+    ul.appendChild(li);
+  });
+  gitUpdateButtons();
+}
+
+function gitUpdateButtons() {
+  const sel = selectedFiles();
+  const hasStaged = gitFiles.some(isStaged);
+  $("gitAdd").disabled = gitBusy || !sel.length;
+  $("gitUnstage").disabled = gitBusy || !sel.some(isStaged);
+  $("gitDiscard").disabled = gitBusy || !sel.some((f) => !isUntracked(f) && f.y !== " ");
+  $("gitCommit").disabled = gitBusy || !hasStaged || !$("gitMessage").value.trim();
+  $("gitPush").disabled = gitBusy;
+  $("gitRefresh").disabled = gitBusy;
+  const all = $("gitAll");
+  all.checked = gitFiles.length > 0 && sel.length === gitFiles.length;
+  all.disabled = !gitFiles.length;
+}
+
+async function gitRefresh() {
+  gitError("");
+  try {
+    const resp = await fetch("/api/git/status?path=" + encodeURIComponent(gitPath()));
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || "Error " + resp.status);
+    gitLoaded = true;
+    renderGit(data);
+    setStatus("Git: " + data.files.length + " archivo(s) con cambios", "ok");
+  } catch (e) {
+    gitError(e.message);
+    setStatus(e.message, "fail");
+  }
+}
+
+async function gitOp(op, body, shown) {
+  gitBusy = true;
+  gitUpdateButtons();
+  gitError("");
+  appendLog("-----");
+  appendLog("$ git " + shown);
+  try {
+    const resp = await post("/api/git/" + op, { path: gitPath(), ...body });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || "Error " + resp.status);
+    if (data.output) data.output.split("\n").forEach(appendLog);
+    setStatus("git " + op + ": listo", "ok");
+    return true;
+  } catch (e) {
+    appendLog("ERROR: " + e.message);
+    gitError(e.message);
+    setStatus("git " + op + " falló", "fail");
+    return false;
+  } finally {
+    gitBusy = false;
+    await gitRefresh();
+  }
+}
+
+$("gitRefresh").addEventListener("click", gitRefresh);
+$("gitPath").addEventListener("keydown", (ev) => { if (ev.key === "Enter") gitRefresh(); });
+$("gitMessage").addEventListener("input", gitUpdateButtons);
+$("gitAll").addEventListener("change", () => {
+  gitSel.clear();
+  if ($("gitAll").checked) gitFiles.forEach((f) => gitSel.add(f.path));
+  document.querySelectorAll("#gitFiles input[type=checkbox]").forEach((cb) => { cb.checked = $("gitAll").checked; });
+  gitUpdateButtons();
+});
+
+$("gitAdd").addEventListener("click", () => {
+  const files = selectedFiles().map((f) => f.path);
+  gitOp("add", { files }, `add (${files.length} archivo/s)`);
+});
+
+$("gitUnstage").addEventListener("click", () => {
+  // En un renombrado también hay que sacar del stage la ruta original (el borrado).
+  const files = selectedFiles().filter(isStaged).flatMap((f) => (f.orig ? [f.path, f.orig] : [f.path]));
+  gitOp("restore", { files, staged: true }, `restore --staged (${files.length} ruta/s)`);
+});
+
+$("gitDiscard").addEventListener("click", async () => {
+  const targets = selectedFiles().filter((f) => !isUntracked(f) && f.y !== " ");
+  const msg = `Se descartarán los cambios sin stage de ${targets.length} archivo(s). Esto NO se puede deshacer.\n\n` +
+    targets.slice(0, 10).map((f) => "• " + f.path).join("\n") + (targets.length > 10 ? "\n…" : "");
+  if (!confirm(msg)) return;
+  const files = targets.map((f) => f.path);
+  await gitOp("restore", { files, staged: false }, `restore (${files.length} archivo/s)`);
+});
+
+$("gitCommit").addEventListener("click", async () => {
+  if (await gitOp("commit", { message: $("gitMessage").value }, "commit")) $("gitMessage").value = "";
+  gitUpdateButtons();
+});
+
+$("gitPush").addEventListener("click", () => gitOp("push", {}, "push"));

@@ -38,6 +38,9 @@
         <button type="button" class="nav-item nav-sub active" data-view="install" aria-current="page"><i class="bi bi-cloud-arrow-up" aria-hidden="true"></i> Instalar</button>
         <button type="button" class="nav-item nav-sub" data-view="create"><i class="bi bi-plus-square" aria-hidden="true"></i> Crear OSB</button>
       </div>
+      <div class="nav-group">
+        <button type="button" class="nav-item" data-view="git"><i class="bi bi-git" aria-hidden="true"></i> Git</button>
+      </div>
     </nav>
 
     <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Cambiar entre tema claro y oscuro">
@@ -158,6 +161,48 @@
             </div>
           </form>
         </section>
+
+        <!-- Vista: Git -->
+        <section id="view-git" data-view="git" aria-labelledby="t-git" hidden>
+          <header class="page-head">
+            <h2 id="t-git">Git</h2>
+            <p>Revisa cambios, prepáralos, haz commit y push sobre el repositorio de trabajo.</p>
+          </header>
+
+          <div class="card">
+            <div class="field-row field-row-end">
+              <div class="field field-grow">
+                <label for="gitPath">Ruta del repositorio</label>
+                <input id="gitPath" type="text" autocomplete="off" spellcheck="false" placeholder="Por defecto: osb.dir de bnTag">
+              </div>
+              <button type="button" id="gitRefresh" class="btn"><i class="bi bi-arrow-clockwise" aria-hidden="true"></i><span>Actualizar</span></button>
+            </div>
+            <p class="git-branch" id="gitBranch" hidden></p>
+
+            <fieldset class="group">
+              <legend>Cambios <span id="gitCount" class="git-count"></span></legend>
+              <label class="git-all"><input type="checkbox" id="gitAll"> Seleccionar todo</label>
+              <ul id="gitFiles" class="git-files" aria-label="Archivos con cambios"></ul>
+            </fieldset>
+
+            <div class="git-actions">
+              <button type="button" id="gitAdd" class="btn" disabled><i class="bi bi-plus-lg" aria-hidden="true"></i><span>Agregar (add)</span></button>
+              <button type="button" id="gitUnstage" class="btn" disabled><i class="bi bi-dash-lg" aria-hidden="true"></i><span>Quitar del stage</span></button>
+              <button type="button" id="gitDiscard" class="btn btn-danger" disabled><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i><span>Descartar cambios</span></button>
+            </div>
+
+            <div class="field git-commit">
+              <label for="gitMessage">Mensaje del commit</label>
+              <textarea id="gitMessage" rows="3" spellcheck="false" placeholder="Describe el cambio"></textarea>
+            </div>
+            <p class="field-error" id="gitError" role="alert" hidden></p>
+
+            <div class="actions git-actions">
+              <button type="button" id="gitCommit" class="btn btn-primary" disabled><i class="bi bi-check2-circle" aria-hidden="true"></i><span>Commit</span></button>
+              <button type="button" id="gitPush" class="btn btn-primary"><i class="bi bi-cloud-upload" aria-hidden="true"></i><span>Push</span></button>
+            </div>
+          </div>
+        </section>
       </div>
 
       <!-- Columna de resultados (compartida por ambas vistas) -->
@@ -167,7 +212,7 @@
           <span id="status" class="status" role="status" aria-live="polite"></span>
         </div>
 
-        <section class="panel" aria-labelledby="h-steps">
+        <section class="panel" id="panel-steps" aria-labelledby="h-steps">
           <header class="panel-head"><h3 id="h-steps"><i class="bi bi-list-check" aria-hidden="true"></i> Pasos</h3></header>
           <ol id="steps" class="steps"></ol>
         </section>

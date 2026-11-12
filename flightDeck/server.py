@@ -6,14 +6,17 @@ import re
 import secrets
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import parse_qs, urlsplit
 
 from . import bntag_runner as bntag
+from . import git_runner as git
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 TOKEN = secrets.token_urlsafe(24)
 MAX_BODY = 16 * 1024
 
 RE_JOB = re.compile(r"^/api/jobs/([0-9a-f]+)/(events|cancel)$")
+GIT_OPS = ("add", "restore", "commit", "push")
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -56,7 +59,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if not self._guard(post=False):
             return
-        path = self.path.split("?", 1)[0]
+        url = urlsplit(self.path)
+        path = url.path
         if path in ("/", "/index.html"):
             html = (STATIC_DIR / "index.html").read_text(encoding="utf-8")
             self._send(200, html.replace("__TOKEN__", TOKEN).encode("utf-8"), "text/html; charset=utf-8")
@@ -64,6 +68,9 @@ class Handler(BaseHTTPRequestHandler):
             self._static(path[len("/static/"):])
         elif path == "/api/bntag/config":
             self._json(200, bntag.environment_status())
+        elif path == "/api/git/status":
+            repo = parse_qs(url.query).get("path", [""])[0]
+            self._git(lambda: git.status(repo))
         else:
             m = RE_JOB.match(path)
             if m and m.group(2) == "events":
@@ -116,6 +123,9 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/bntag/run":
             self._run()
             return
+        if path.startswith("/api/git/") and path[len("/api/git/"):] in GIT_OPS:
+            self._git_op(path[len("/api/git/"):])
+            return
         m = RE_JOB.match(path)
         if m and m.group(2) == "cancel":
             job = bntag.get_job(m.group(1))
@@ -127,7 +137,8 @@ class Handler(BaseHTTPRequestHandler):
             return
         self._json(404, {"error": "No encontrado"})
 
-    def _run(self) -> None:
+    def _body(self) -> dict | None:
+        """Lee el body JSON (objeto). Responde 400 y devuelve None si es inválido."""
         try:
             length = int(self.headers.get("Content-Length", "0"))
             if length > MAX_BODY:
@@ -135,8 +146,42 @@ class Handler(BaseHTTPRequestHandler):
             req = json.loads(self.rfile.read(length) or b"{}")
             if not isinstance(req, dict):
                 raise ValueError
+            return req
         except ValueError:
             self._json(400, {"error": "JSON inválido"})
+            return None
+
+    def _git(self, call) -> None:
+        try:
+            self._json(200, call())
+        except git.GitError as exc:
+            self._json(400, {"error": str(exc)})
+
+    def _git_op(self, op: str) -> None:
+        req = self._body()
+        if req is None:
+            return
+        repo = req.get("path", "")
+        if not isinstance(repo, str):
+            self._json(400, {"error": "'path' debe ser texto"})
+            return
+        if op == "add":
+            call = lambda: git.add(repo, req.get("files"))
+        elif op == "restore":
+            staged = req.get("staged", False)
+            if not isinstance(staged, bool):
+                self._json(400, {"error": "'staged' debe ser booleano"})
+                return
+            call = lambda: git.restore(repo, req.get("files"), staged)
+        elif op == "commit":
+            call = lambda: git.commit(repo, req.get("message"))
+        else:
+            call = lambda: git.push(repo)
+        self._git(lambda: {"output": call()})
+
+    def _run(self) -> None:
+        req = self._body()
+        if req is None:
             return
         try:
             job = bntag.start_job(req)
