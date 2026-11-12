@@ -1,0 +1,4 @@
+# Scripts y archivos de build/plantilla: siempre LF (bash y make fallan con CRLF)
+*.sh text eol=lf
+Makefile text eol=lf
+*.tpl text eol=lf
