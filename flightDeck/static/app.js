@@ -2,13 +2,10 @@
 
 const TOKEN = document.querySelector('meta[name="fd-token"]').content;
 const $ = (id) => document.getElementById(id);
-// Íconos de Bootstrap Icons por estado de paso.
-const ICONS = {
-  PENDING: '<i class="bi bi-circle"></i>',
-  RUNNING: '<i class="bi bi-arrow-repeat spin"></i>',
-  SUCCESS: '<i class="bi bi-check-circle-fill"></i>',
-  FAILED: '<i class="bi bi-x-circle-fill"></i>',
-  SKIPPED: '<i class="bi bi-dash-circle"></i>',
+const NAME_RE = /^[A-Za-z0-9_.-]+$/;
+
+const STATE_LABEL = {
+  PENDING: "Pendiente", RUNNING: "En curso", SUCCESS: "Listo", FAILED: "Falló", SKIPPED: "Omitido",
 };
 
 let currentJob = null;
@@ -16,57 +13,120 @@ let source = null;
 
 // --- Tema claro / oscuro ----------------------------------------------------
 function applyThemeLabel() {
-  const dark = document.documentElement.getAttribute("data-bs-theme") === "dark";
+  const dark = document.documentElement.getAttribute("data-theme") === "dark";
   $("theme-label").textContent = dark ? "Tema claro" : "Tema oscuro";
 }
 $("theme-toggle").addEventListener("click", () => {
-  const next = document.documentElement.getAttribute("data-bs-theme") === "dark" ? "light" : "dark";
-  document.documentElement.setAttribute("data-bs-theme", next);
+  const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
   try { localStorage.setItem("fd-theme", next); } catch (e) { /* almacenamiento no disponible */ }
   applyThemeLabel();
 });
 applyThemeLabel();
 
-// --- Formulario: mostrar solo las opciones que aplican ---------------------
+// --- Navegación entre vistas -------------------------------------------------
+function showView(name) {
+  document.querySelectorAll("section[data-view]").forEach((s) => { s.hidden = s.dataset.view !== name; });
+  document.querySelectorAll(".nav-item").forEach((b) => {
+    const active = b.dataset.view === name;
+    b.classList.toggle("active", active);
+    if (active) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+  });
+}
+document.querySelectorAll(".nav-item").forEach((b) => b.addEventListener("click", () => showView(b.dataset.view)));
+
+// --- Formulario Instalar -----------------------------------------------------
+// Alcance y "Compilar" solo aplican a OSB; para SOA solo queda "Importar al servidor".
 function refreshForm() {
   const target = $("target").value;
-  const create = $("create").checked;
-  document.querySelectorAll(".checks label").forEach((l) => {
-    l.hidden = !l.dataset.for.split(" ").includes(target);
+  document.querySelectorAll("#install-form [data-for]").forEach((el) => {
+    el.hidden = !el.dataset.for.split(" ").includes(target);
   });
-  // --create no se combina con --project/--skipCompile/--skipImport; --rest requiere --create
-  for (const id of ["project", "skipCompile", "skipImport"]) {
-    $(id).disabled = target === "osb" && create;
-    if ($(id).disabled) $(id).checked = false;
-  }
-  $("rest").disabled = !(target === "osb" && create);
-  if ($("rest").disabled) $("rest").checked = false;
   if (target === "soa") {
-    for (const id of ["create", "rest", "project", "skipCompile"]) $(id).checked = false;
+    $("scopeGit").checked = true;
+    $("doCompile").checked = true;
   }
+  refreshCommands();
 }
-$("target").addEventListener("change", refreshForm);
-$("create").addEventListener("change", refreshForm);
+
+// Comando equivalente (los controles están en positivo; el comando usa los flags de consola).
+function installArgs() {
+  const osb = $("target").value === "osb";
+  const args = [osb ? "-osb" : "-soa", $("name").value.trim() || "<nombre>"];
+  if (osb && $("scopeProject").checked) args.push("--project");
+  if (osb && !$("doCompile").checked) args.push("--skipCompile");
+  if (!$("doImport").checked) args.push("--skipImport");
+  return args;
+}
+function createArgs() {
+  const args = ["-osb", $("createName").value.trim() || "<nombre>", "--create"];
+  if ($("rest").checked) args.push("--rest");
+  return args;
+}
+function refreshCommands() {
+  $("cmdInstall").textContent = installArgs().join(" ");
+  $("cmdCreate").textContent = createArgs().join(" ");
+}
+
+["target"].forEach((id) => $(id).addEventListener("change", refreshForm));
+["name", "createName"].forEach((id) => $(id).addEventListener("input", () => { clearError(id); refreshCommands(); }));
+["scopeGit", "scopeProject", "doCompile", "doImport", "rest"].forEach((id) => $(id).addEventListener("change", refreshCommands));
+
+// Validación en línea: el error va bajo su propio campo.
+function showError(inputId, errorId, text) {
+  const input = $(inputId), err = $(errorId);
+  input.setAttribute("aria-invalid", "true");
+  err.textContent = text;
+  err.hidden = false;
+  input.focus();
+}
+function clearError(inputId) {
+  const input = $(inputId);
+  input.removeAttribute("aria-invalid");
+  const err = $(inputId === "name" ? "nameError" : "createNameError");
+  err.hidden = true;
+}
+function nameValid(inputId, errorId) {
+  const v = $(inputId).value.trim();
+  if (!v) { showError(inputId, errorId, "Escribe el nombre del servicio."); return false; }
+  if (!NAME_RE.test(v)) { showError(inputId, errorId, "Solo letras, números, '_', '-' y '.'."); return false; }
+  return true;
+}
+
 refreshForm();
 
-// --- Estado del entorno ------------------------------------------------------
+// --- Entorno (Pre-vuelo) -----------------------------------------------------
+function setChip(key, ok) {
+  const chip = document.querySelector(`.chip[data-check="${key}"]`);
+  if (chip) chip.dataset.state = ok === null ? "running" : ok ? "ok" : "alarm";
+}
+
 async function loadEnv() {
+  const bar = $("preflight"), state = $("preflight-state"), detail = $("preflight-detail");
   try {
-    const env = await (await fetch("/api/bntag/config")).json();
+    const resp = await fetch("/api/bntag/config");
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const env = await resp.json();
+    const checks = {
+      java: [env.java, "No se encontró 'java' en el PATH"],
+      oracle_home: [env.oracle_home, "Variable de ambiente ORACLE_HOME no definida"],
+      properties: [env.properties, "Falta config/application.properties en " + env.bntag_home],
+      jar: [env.jar, "Falta target/installbn-1.0.0.jar (mvn package)"],
+    };
     const problems = [];
-    if (!env.properties) problems.push("Falta config/application.properties en " + env.bntag_home);
-    if (!env.jar) problems.push("Falta target/installbn-1.0.0.jar (mvn package)");
-    if (!env.java) problems.push("No se encontró 'java' en el PATH");
-    if (!env.oracle_home) problems.push("Variable de ambiente ORACLE_HOME no definida");
-    const box = $("env-warnings");
-    box.hidden = problems.length === 0;
-    box.innerHTML = "";
-    if (problems.length) {
-      const ul = document.createElement("ul");
-      problems.forEach((p) => { const li = document.createElement("li"); li.textContent = p; ul.appendChild(li); });
-      box.append("Entorno incompleto:", ul);
+    for (const [key, [ok, msg]] of Object.entries(checks)) {
+      setChip(key, !!ok);
+      if (!ok) problems.push(msg);
     }
+    bar.classList.toggle("has-alarm", problems.length > 0);
+    state.textContent = problems.length ? `${problems.length} sin resolver` : "Listo para despegar";
+    detail.hidden = problems.length === 0;
+    detail.innerHTML = "";
+    problems.forEach((p) => { const li = document.createElement("li"); li.textContent = p; detail.appendChild(li); });
   } catch (e) {
+    ["java", "oracle_home", "properties", "jar"].forEach((k) => setChip(k, null));
+    bar.classList.add("has-alarm");
+    state.textContent = "No se pudo consultar el entorno";
     setStatus("No se pudo consultar el entorno", "fail");
   }
 }
@@ -80,9 +140,9 @@ function renderSteps(names) {
     const li = document.createElement("li");
     li.dataset.step = n;
     li.dataset.status = "PENDING";
-    li.innerHTML = '<span class="icon"></span><span><span class="name"></span><span class="msg"></span></span>';
+    li.innerHTML = '<i class="lamp" aria-hidden="true"></i><span class="name"></span><span class="state"></span><span class="msg"></span>';
     li.querySelector(".name").textContent = n;
-    li.querySelector(".icon").innerHTML = ICONS.PENDING;
+    li.querySelector(".state").textContent = STATE_LABEL.PENDING;
     ol.appendChild(li);
   });
 }
@@ -91,7 +151,7 @@ function setStep(name, status, msg) {
   const li = document.querySelector(`#steps li[data-step="${CSS.escape(name)}"]`);
   if (!li) return;
   li.dataset.status = status;
-  li.querySelector(".icon").innerHTML = ICONS[status] || ICONS.PENDING;
+  li.querySelector(".state").textContent = STATE_LABEL[status] || status;
   li.querySelector(".msg").textContent = msg || "";
 }
 
@@ -107,14 +167,36 @@ function appendLog(line) {
   if (atBottom) log.scrollTop = log.scrollHeight;
 }
 
+$("logClear").addEventListener("click", () => { $("log").innerHTML = ""; });
+$("logCopy").addEventListener("click", async () => {
+  const btn = $("logCopy"), label = btn.querySelector("span");
+  try {
+    await navigator.clipboard.writeText($("log").innerText);
+    label.textContent = "Copiado";
+  } catch (e) {
+    label.textContent = "No se pudo copiar";
+  }
+  setTimeout(() => { label.textContent = "Copiar"; }, 1500);
+});
+
 function setStatus(text, cls) {
   const s = $("status");
-  s.textContent = text;
   s.className = "status" + (cls ? " " + cls : "");
+  s.textContent = "";
+  if (cls) {
+    const i = document.createElement("i");
+    i.className = "bi " + (cls === "ok" ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill");
+    i.setAttribute("aria-hidden", "true");
+    s.append(i, " ");
+  }
+  s.append(text);
 }
 
 function setRunning(running) {
-  $("run").disabled = running;
+  for (const [id, idle, busy] of [["run", "Instalar", "Ejecutando…"], ["runCreate", "Crear proyecto", "Ejecutando…"]]) {
+    $(id).disabled = running;
+    $(id).querySelector("span").textContent = running ? busy : idle;
+  }
   $("cancel").disabled = !running;
 }
 
@@ -127,11 +209,27 @@ function post(url, body) {
   });
 }
 
-$("bntag-form").addEventListener("submit", async (ev) => {
+$("install-form").addEventListener("submit", (ev) => {
   ev.preventDefault();
-  const body = { target: $("target").value, name: $("name").value.trim() };
-  for (const id of ["project", "skipCompile", "skipImport", "create", "rest"]) body[id] = $(id).checked;
+  if (!nameValid("name", "nameError")) return;
+  const osb = $("target").value === "osb";
+  // Los controles están en positivo (Compilar/Importar); el backend espera flags "skip".
+  runJob({
+    target: $("target").value,
+    name: $("name").value.trim(),
+    project: osb && $("scopeProject").checked,
+    skipCompile: osb && !$("doCompile").checked,
+    skipImport: !$("doImport").checked,
+  });
+});
 
+$("create-form").addEventListener("submit", (ev) => {
+  ev.preventDefault();
+  if (!nameValid("createName", "createNameError")) return;
+  runJob({ target: "osb", name: $("createName").value.trim(), create: true, rest: $("rest").checked });
+});
+
+async function runJob(body) {
   setRunning(true);
   setStatus("Iniciando…");
   $("log").innerHTML = "";
@@ -150,7 +248,7 @@ $("bntag-form").addEventListener("submit", async (ev) => {
   renderSteps(data.steps);
   setStatus("En ejecución: " + data.command);
   listen(currentJob);
-});
+}
 
 function listen(jobId) {
   source = new EventSource(`/api/jobs/${jobId}/events`);
