@@ -291,6 +291,7 @@ let gitLoaded = false;
 let gitBusy = false;
 let gitFiles = [];
 const gitSel = new Set();
+let gitBranchName = "";
 
 const GIT_CODE = { M: "Modificado", A: "Agregado", D: "Borrado", R: "Renombrado", C: "Copiado", T: "Tipo", U: "Conflicto" };
 const gitPath = () => $("gitPath").value.trim();
@@ -308,6 +309,7 @@ function renderGit(data) {
   gitFiles = data.files;
   [...gitSel].forEach((p) => { if (!gitFiles.some((f) => f.path === p)) gitSel.delete(p); });
   $("gitPath").value = data.path;
+  gitBranchName = data.branch;
 
   const b = $("gitBranch");
   const parts = [data.branch || "(sin rama)"];
@@ -446,4 +448,4 @@ $("gitCommit").addEventListener("click", async () => {
   gitUpdateButtons();
 });
 
-$("gitPush").addEventListener("click", () => gitOp("push", {}, "push"));
+$("gitPush").addEventListener("click", () => gitOp("push", {}, "push origin " + (gitBranchName || "<rama>")));

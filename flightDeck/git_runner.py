@@ -181,10 +181,12 @@ def commit(path: str, message) -> str:
 
 
 def push(path: str) -> str:
-    """Push normal (nunca --force). Sin upstream configurado: publica la rama en 'origin'."""
+    """`git push origin <rama actual>` (nunca --force). Siempre a 'origin', sin depender del
+    upstream configurado (el repo también tiene el remoto 'upstream')."""
     repo = _repo_dir(path)
     with _lock:
-        code, _ = _run(repo, ["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], check=False)
-        args = ["push"] if code == 0 else ["push", "-u", "origin", "HEAD"]
-        _, out = _run(repo, args)
+        code, branch = _run(repo, ["symbolic-ref", "--short", "HEAD"], check=False)
+        if code != 0 or not branch:
+            raise GitError("No estás en una rama; no se puede hacer push.")
+        _, out = _run(repo, ["push", "origin", branch])
     return out
