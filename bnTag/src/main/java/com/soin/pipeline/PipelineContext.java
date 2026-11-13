@@ -28,6 +28,7 @@ public class PipelineContext {
     private boolean rest = false;
 
     private int dvmNumber = 0;
+    private String dvmXmlFile;
 
     private List<String> gitFiles;
 
@@ -37,6 +38,15 @@ public class PipelineContext {
 
     public void setDvmNumber(int dvmNumber){
         this.dvmNumber=dvmNumber;
+    }
+
+    /** Ruta del XML de DVM generado en esta ejecución; null si no se generó. */
+    public String getDvmXmlFile() {
+        return dvmXmlFile;
+    }
+
+    public void setDvmXmlFile(String dvmXmlFile) {
+        this.dvmXmlFile = dvmXmlFile;
     }
 
     public boolean isImport() {

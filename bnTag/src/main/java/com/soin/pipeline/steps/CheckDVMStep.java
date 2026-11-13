@@ -1,5 +1,6 @@
 package com.soin.pipeline.steps;
 
+import java.nio.file.Paths;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,6 +51,7 @@ public class CheckDVMStep implements PipelineStep {
             context.setDvmNumber(dvmNumber);
 
             DVMXmlGenerator.generate(context.getArchivo(), String.valueOf(dvmNumber), OUTPUT_FILE);
+            context.setDvmXmlFile(Paths.get(OUTPUT_FILE).toAbsolutePath().toString());
 
             return StepResult.success("Siguiente número de DVM: " + dvmNumber + ". XML generado: " + OUTPUT_FILE);
 

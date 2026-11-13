@@ -24,6 +24,11 @@ public class UploadFileStep implements PipelineStep {
             return StepResult.skipped("Carga de " + target.label() + " no ejecutada porque se indicó --skipImport");
         }
 
+        String reason = target.skipReason(context);
+        if (reason != null) {
+            return StepResult.skipped(reason);
+        }
+
         try {
 
             LOG.info("Subiendo archivo...");

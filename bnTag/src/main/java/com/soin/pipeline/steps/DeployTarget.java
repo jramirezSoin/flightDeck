@@ -1,5 +1,6 @@
 package com.soin.pipeline.steps;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import com.soin.pipeline.PipelineContext;
@@ -42,6 +43,32 @@ public enum DeployTarget {
         String scriptArgument(PipelineContext context) {
             return context.getArchivoSOA();
         }
+    },
+
+    /** XML de DVM generado por CheckDVMStep: solo se sube (no hay script de importación). */
+    DVM("XML de DVM", null) {
+        @Override
+        String skipReason(PipelineContext context) {
+            return context.getDvmXmlFile() == null
+                    ? "No se generó el XML de DVM; no hay nada que enviar"
+                    : null;
+        }
+
+        @Override
+        String localFile(PipelineContext context) {
+            return context.getDvmXmlFile();
+        }
+
+        @Override
+        String remoteName(PipelineContext context) {
+            Path name = Paths.get(context.getDvmXmlFile()).getFileName();
+            return name.toString();
+        }
+
+        @Override
+        String scriptArgument(PipelineContext context) {
+            throw new UnsupportedOperationException("El XML de DVM no se importa con un script");
+        }
     };
 
     private final String label;
@@ -60,6 +87,11 @@ public enum DeployTarget {
     /** Nombre del script remoto que importa el archivo. */
     String script() {
         return script;
+    }
+
+    /** Motivo para omitir la carga (por ejemplo, no hay archivo); null si se debe subir. */
+    String skipReason(PipelineContext context) {
+        return null;
     }
 
     /** Ruta local del archivo a subir. */

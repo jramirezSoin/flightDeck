@@ -20,7 +20,7 @@ NAME_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
 
 STEPS_SOA = ["LoadContext", "UploadFileStep", "ImportStep"]
 STEPS_SOA_CREATE = ["LoadContext", "CreateSOAStep"]
-STEPS_OSB_CREATE = ["LoadContext", "CheckDVMStep", "CreateOSBStep"]
+STEPS_OSB_CREATE = ["LoadContext", "CheckDVMStep", "UploadFileStep", "CreateOSBStep"]
 STEPS_OSB = ["LoadContext", "GitStatusStep", "OSBCompile", "UploadFileStep", "ImportStep"]
 
 RE_RUNNING = re.compile(r"^Ejecutando: (\S+)\s*$")

@@ -109,6 +109,7 @@ public class App {
                 pipeline
                     .addStep(new LoadContext())
                     .addStep(new CheckDVMStep())
+                    .addStep(new UploadFileStep(DeployTarget.DVM))
                     .addStep(new CreateOSBStep());
             }
             else if (context.isOSB()) {
