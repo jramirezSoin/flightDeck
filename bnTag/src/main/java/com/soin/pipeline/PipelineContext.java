@@ -27,7 +27,17 @@ public class PipelineContext {
     private boolean create = false;
     private boolean rest = false;
 
+    private int dvmNumber = 0;
+
     private List<String> gitFiles;
+
+    public int getDvmNumber(){
+        return dvmNumber;
+    }
+
+    public void setDvmNumber(int dvmNumber){
+        this.dvmNumber=dvmNumber;
+    }
 
     public boolean isImport() {
         return importUpdload;

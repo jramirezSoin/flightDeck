@@ -108,6 +108,7 @@ public class App {
             else if (context.isOSB() && context.isCreate()) {
                 pipeline
                     .addStep(new LoadContext())
+                    .addStep(new CheckDVMStep())
                     .addStep(new CreateOSBStep());
             }
             else if (context.isOSB()) {
