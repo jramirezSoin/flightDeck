@@ -26,6 +26,11 @@ public class CheckDVMStep implements PipelineStep {
     @Override
     public StepResult execute(PipelineContext context) {
 
+        String area = context.getDvmArea();
+        if (area == null || area.trim().isEmpty()) {
+            return StepResult.skipped("No se indicó --dvmArea; no se genera el XML de DVM");
+        }
+
         try {
             LOG.info("Consultando el siguiente número de DVM...");
 
@@ -48,7 +53,12 @@ public class CheckDVMStep implements PipelineStep {
             }
 
             int dvmNumber = Integer.parseInt(matcher.group(1));
-            DVMXmlGenerator.generate(context.getArchivo(), String.valueOf(dvmNumber), OUTPUT_FILE);
+            DVMXmlGenerator.generate(
+                    context.getArchivo(),
+                    String.valueOf(dvmNumber),
+                    area.trim(),
+                    context.getDvmComplexity(),
+                    OUTPUT_FILE);
             // Solo con el XML generado se guarda el número: si algo falla antes, el OSB usa el valor por defecto.
             context.setDvmXmlFile(Paths.get(OUTPUT_FILE).toAbsolutePath().toString());
             context.setDvmNumber(dvmNumber);

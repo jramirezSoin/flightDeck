@@ -358,3 +358,7 @@ textarea:focus-visible { outline: 2px solid var(--fd-go); outline-offset: 0; bor
 .git-commit { margin-top: var(--fd-s-4); }
 .btn-danger { color: var(--fd-alarm); }
 .btn-danger:hover:not(:disabled) { border-color: var(--fd-alarm); }
+
+/* Create: bloque DVM */
+.hint { font-size: var(--fd-t-2); color: var(--fd-ink-3); }
+.dvm-complexity { margin-top: var(--fd-s-3); max-width: 200px; }

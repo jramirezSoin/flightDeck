@@ -152,6 +152,25 @@
             </div>
             <p class="field-error" id="createNameError" role="alert" hidden></p>
 
+            <fieldset class="group" id="dvm-group" data-for="osb">
+              <legend>DVM</legend>
+              <div class="field">
+                <label for="dvmArea">Área de aplicación</label>
+                <input id="dvmArea" type="text" autocomplete="off" spellcheck="false" maxlength="60"
+                       placeholder="Ej.: SINPE_MOVIL, JP MORGAN, OMNICANALIDAD" aria-describedby="dvmAreaHint dvmAreaError">
+                <small id="dvmAreaHint" class="hint">Opcional. Sin área no se genera ni se sube el XML de DVM.</small>
+              </div>
+              <p class="field-error" id="dvmAreaError" role="alert" hidden></p>
+              <div class="field dvm-complexity">
+                <label for="dvmComplexity">Complejidad</label>
+                <select id="dvmComplexity">
+                  <option value="simple" selected>Simple</option>
+                  <option value="complex">Complex</option>
+                  <option value="ramificado">Ramificado</option>
+                </select>
+              </div>
+            </fieldset>
+
             <fieldset class="group">
               <legend>Opciones</legend>
               <div class="switches">

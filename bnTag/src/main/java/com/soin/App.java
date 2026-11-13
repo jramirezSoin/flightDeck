@@ -18,7 +18,7 @@ public class App {
 
     private static void printUsage() {
         System.out.println("Uso: bntag.sh -osb <OSB name> [--project] [--skipCompile] [--skipImport]");
-        System.out.println("     bntag.sh -osb <OSB name> --create [--rest]");
+        System.out.println("     bntag.sh -osb <OSB name> --create [--rest] [--dvmArea <area> [--dvmComplexity <simple|complex|ramificado>]]");
         System.out.println("     bntag.sh -soa <SOA name> [--skipImport]");
         System.out.println("-osb <nombre>: Proyecto OSB a procesar");
         System.out.println("-soa <nombre>: Proyecto SOA a procesar");
@@ -27,6 +27,8 @@ public class App {
         System.out.println("--skipImport: Omite la importación durante la ejecución");
         System.out.println("--create: Crea un proyecto OSB nuevo en el workspace local a partir de la plantilla");
         System.out.println("--rest: Con --create, incluye el ProxyService REST");
+        System.out.println("--dvmArea: Con --create, área de aplicación de la DVM (si falta, no se genera el XML de DVM)");
+        System.out.println("--dvmComplexity: Con --dvmArea, complejidad de la DVM: simple (por defecto), complex o ramificado");
     }
 
     private static void fail(String message) {
@@ -82,6 +84,25 @@ public class App {
                     case "--rest":
                         context.setRest(true);
                         break;
+
+                    case "--dvmArea":
+                        if (i + 1 >= args.length) {
+                            fail("Falta el valor después de --dvmArea");
+                        }
+                        context.setDvmArea(args[++i]);
+                        break;
+
+                    case "--dvmComplexity": {
+                        if (i + 1 >= args.length) {
+                            fail("Falta el valor después de --dvmComplexity");
+                        }
+                        String complexity = args[++i].toLowerCase(java.util.Locale.ROOT);
+                        if (!complexity.equals("simple") && !complexity.equals("complex") && !complexity.equals("ramificado")) {
+                            fail("--dvmComplexity debe ser simple, complex o ramificado");
+                        }
+                        context.setDvmComplexity(complexity);
+                        break;
+                    }
 
                     default:
                         fail("Parámetro desconocido: " + args[i]);

@@ -60,9 +60,15 @@ function installArgs() {
   if (!$("doImport").checked) args.push("--skipImport");
   return args;
 }
+const DVM_AREA_RE = /^[A-Za-z0-9][A-Za-z0-9 _.-]{0,59}$/;
 function createArgs() {
-  const args = [$("createTarget").value === "soa" ? "-soa" : "-osb", $("createName").value.trim() || "<nombre>", "--create"];
+  const osb = $("createTarget").value !== "soa";
+  const args = [osb ? "-osb" : "-soa", $("createName").value.trim() || "<nombre>", "--create"];
   if ($("rest").checked) args.push("--rest");
+  const area = $("dvmArea").value.trim();
+  if (osb && area) {
+    args.push("--dvmArea", /\s/.test(area) ? `"${area}"` : area, "--dvmComplexity", $("dvmComplexity").value);
+  }
   return args;
 }
 function refreshCommands() {
@@ -71,7 +77,16 @@ function refreshCommands() {
 }
 
 ["target"].forEach((id) => $(id).addEventListener("change", refreshForm));
-$("createTarget").addEventListener("change", refreshCommands);
+function refreshCreateForm() {
+  const target = $("createTarget").value;
+  document.querySelectorAll("#create-form [data-for]").forEach((el) => {
+    el.hidden = !el.dataset.for.split(" ").includes(target);
+  });
+  refreshCommands();
+}
+$("createTarget").addEventListener("change", refreshCreateForm);
+$("dvmArea").addEventListener("input", () => { clearError("dvmArea"); refreshCommands(); });
+$("dvmComplexity").addEventListener("change", refreshCommands);
 ["name", "createName"].forEach((id) => $(id).addEventListener("input", () => { clearError(id); refreshCommands(); }));
 ["scopeGit", "scopeProject", "doCompile", "doImport", "rest"].forEach((id) => $(id).addEventListener("change", refreshCommands));
 
@@ -86,8 +101,8 @@ function showError(inputId, errorId, text) {
 function clearError(inputId) {
   const input = $(inputId);
   input.removeAttribute("aria-invalid");
-  const err = $(inputId === "name" ? "nameError" : "createNameError");
-  err.hidden = true;
+  const errIds = { name: "nameError", createName: "createNameError", dvmArea: "dvmAreaError" };
+  $(errIds[inputId]).hidden = true;
 }
 function nameValid(inputId, errorId) {
   const v = $(inputId).value.trim();
@@ -97,6 +112,7 @@ function nameValid(inputId, errorId) {
 }
 
 refreshForm();
+refreshCreateForm();
 
 // --- Entorno (Pre-vuelo) -----------------------------------------------------
 function setChip(key, ok) {
@@ -229,7 +245,15 @@ $("install-form").addEventListener("submit", (ev) => {
 $("create-form").addEventListener("submit", (ev) => {
   ev.preventDefault();
   if (!nameValid("createName", "createNameError")) return;
-  runJob({ target: $("createTarget").value, name: $("createName").value.trim(), create: true, rest: $("rest").checked });
+  const osb = $("createTarget").value === "osb";
+  const area = $("dvmArea").value.trim();
+  if (osb && area && !DVM_AREA_RE.test(area)) {
+    showError("dvmArea", "dvmAreaError", "Solo letras, números, espacios, '_', '-' y '.' (máx. 60).");
+    return;
+  }
+  const body = { target: $("createTarget").value, name: $("createName").value.trim(), create: true, rest: $("rest").checked };
+  if (osb && area) { body.dvmArea = area; body.dvmComplexity = $("dvmComplexity").value; }
+  runJob(body);
 });
 
 async function runJob(body) {

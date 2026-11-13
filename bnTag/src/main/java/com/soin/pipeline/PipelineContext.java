@@ -29,6 +29,8 @@ public class PipelineContext {
 
     private int dvmNumber = 1;
     private String dvmXmlFile;
+    private String dvmArea;
+    private String dvmComplexity = "simple";
 
     private List<String> gitFiles;
 
@@ -38,6 +40,24 @@ public class PipelineContext {
 
     public void setDvmNumber(int dvmNumber){
         this.dvmNumber=dvmNumber;
+    }
+
+    /** Área de aplicación de la DVM (--dvmArea); null si no se indicó. */
+    public String getDvmArea() {
+        return dvmArea;
+    }
+
+    public void setDvmArea(String dvmArea) {
+        this.dvmArea = dvmArea;
+    }
+
+    /** Complejidad de la DVM: simple, complex o ramificado (--dvmComplexity). */
+    public String getDvmComplexity() {
+        return dvmComplexity;
+    }
+
+    public void setDvmComplexity(String dvmComplexity) {
+        this.dvmComplexity = dvmComplexity;
     }
 
     /** Ruta del XML de DVM generado en esta ejecución; null si no se generó. */

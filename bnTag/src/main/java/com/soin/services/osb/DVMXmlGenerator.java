@@ -18,6 +18,7 @@ public class DVMXmlGenerator {
 
         public static void generate(
                         String projectName, String dvmNumber,
+                        String dvmArea, String dvmComplexity,
                         String outputFile) throws Exception {
 
                 String[] values = {
@@ -26,11 +27,11 @@ public class DVMXmlGenerator {
                     "1",
                     projectName,
                     projectName,
-                    "CREDITO_DIGITAL",
+                    dvmArea,
                     "false",
                     "true",
                     "1",
-                    "complex"
+                    dvmComplexity
                 };
 
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

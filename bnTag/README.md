@@ -81,5 +81,7 @@ installBN.sh -soa <nombre SOA> [--skipImport]
 | `--skipImport` | Omite subida e importación |
 | `--create` | Crea el proyecto OSB desde la plantilla |
 | `--rest` | Con `--create`, incluye el ProxyService REST |
+| `--dvmArea <área>` | Con `--create` de un OSB, área de aplicación de la DVM (ej. `SINPE_MOVIL`); sin ella no se genera ni se sube el XML de DVM |
+| `--dvmComplexity <valor>` | Con `--dvmArea`: `simple` (por defecto), `complex` o `ramificado` |
 
 El proceso termina con código `1` si algún paso falla.

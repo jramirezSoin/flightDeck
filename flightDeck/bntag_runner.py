@@ -17,6 +17,8 @@ from string import Template
 JAR_NAME = "installbn-1.0.0.jar"
 TMP_DIR = "C:/Temp/osbinstance"  # mismo valor que el rm -rf de installBN.sh
 NAME_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
+DVM_AREA_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 _.-]{0,59}$")
+DVM_COMPLEXITIES = ("simple", "complex", "ramificado")
 
 STEPS_SOA = ["LoadContext", "UploadFileStep", "ImportStep"]
 STEPS_SOA_CREATE = ["LoadContext", "CreateSOAStep"]
@@ -96,12 +98,22 @@ def validate_request(req: dict) -> tuple[list[str], list[str]]:
 
     if flags["rest"] and not flags["create"]:
         raise RunError("--rest requiere --create")
+    if req.get("dvmArea") and not flags["create"]:
+        raise RunError("El área de DVM solo aplica con --create")
     if flags["create"]:
         if flags["project"] or flags["skipCompile"] or flags["skipImport"]:
             raise RunError("--create no se combina con --project, --skipCompile ni --skipImport")
         args = ["-osb", name, "--create"]
         if flags["rest"]:
             args.append("--rest")
+        area = req.get("dvmArea") or ""
+        complexity = req.get("dvmComplexity") or "simple"
+        if not isinstance(area, str) or (area and not DVM_AREA_RE.match(area)):
+            raise RunError("Área de aplicación inválida: letras, números, espacios, '_', '-' y '.' (máx. 60)")
+        if complexity not in DVM_COMPLEXITIES:
+            raise RunError("Complejidad inválida: simple, complex o ramificado")
+        if area:
+            args += ["--dvmArea", area, "--dvmComplexity", complexity]
         return args, list(STEPS_OSB_CREATE)
 
     args = ["-osb", name]
