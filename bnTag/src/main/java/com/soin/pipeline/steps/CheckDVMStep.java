@@ -48,10 +48,10 @@ public class CheckDVMStep implements PipelineStep {
             }
 
             int dvmNumber = Integer.parseInt(matcher.group(1));
-            context.setDvmNumber(dvmNumber);
-
             DVMXmlGenerator.generate(context.getArchivo(), String.valueOf(dvmNumber), OUTPUT_FILE);
+            // Solo con el XML generado se guarda el número: si algo falla antes, el OSB usa el valor por defecto.
             context.setDvmXmlFile(Paths.get(OUTPUT_FILE).toAbsolutePath().toString());
+            context.setDvmNumber(dvmNumber);
 
             return StepResult.success("Siguiente número de DVM: " + dvmNumber + ". XML generado: " + OUTPUT_FILE);
 

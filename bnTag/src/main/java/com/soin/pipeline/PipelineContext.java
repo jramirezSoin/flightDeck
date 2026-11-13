@@ -27,7 +27,7 @@ public class PipelineContext {
     private boolean create = false;
     private boolean rest = false;
 
-    private int dvmNumber = 0;
+    private int dvmNumber = 1;
     private String dvmXmlFile;
 
     private List<String> gitFiles;

@@ -21,7 +21,7 @@
                         <con1:assign varName="idServicio" xmlns:con1="http://www.bea.com/wli/sb/stages/transform/config">
                             <con2:id xmlns:con2="http://www.bea.com/wli/sb/stages/config">_ActionId-a00ee4a.36f2c4f7.0.1a0d45ec72c.N7fed</con2:id>
                             <con1:expr>
-                                <con2:xqueryText xmlns:con2="http://www.bea.com/wli/sb/stages/config">'1'</con2:xqueryText>
+                                <con2:xqueryText xmlns:con2="http://www.bea.com/wli/sb/stages/config">'{DVMNUMBER}'</con2:xqueryText>
                             </con1:expr>
                         </con1:assign>
                     </con:actions>

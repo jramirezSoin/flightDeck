@@ -26,7 +26,7 @@ public class CreateOSBStep implements PipelineStep {
             }
 
             LOG.info("Creando OSB en " + context.getOsbPath() + "...");
-            CreateOSB.create(context.getArchivo(), carpeta, context.isRest());
+            CreateOSB.create(context.getArchivo(),String.valueOf(context.getDvmNumber()), carpeta, context.isRest());
 
             return StepResult.success("OSB creado correctamente en " + context.getOsbPath());
 

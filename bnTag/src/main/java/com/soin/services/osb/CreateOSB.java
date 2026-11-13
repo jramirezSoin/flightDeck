@@ -12,8 +12,9 @@ public class CreateOSB {
     private static final String PLACEHOLDER_NAME = "{NAME}";
     private static final String PLACEHOLDER_SNAME = "{SNAME}";
     private static final String PLACEHOLDER_lowerNAME = "{name}";
+    private static final String PLACEHOLDER_DVMNUMBER = "{DVMNUMBER}";
 
-    public static void create(String osbName, Path destination, boolean isRest) throws IOException {
+    public static void create(String osbName, String dvmNumber, Path destination, boolean isRest) throws IOException {
 
         // createTempDirectory no crea el directorio base; java.io.tmpdir (java_opts.txt) puede no existir
         // porque el lanzador lo limpia antes de cada ejecución.
@@ -30,7 +31,7 @@ public class CreateOSB {
                         Path file, BasicFileAttributes attrs) throws IOException {
 
                     Path relativePath = tempDirectory.relativize(file);
-                    Path renamed = replaceName(relativePath, osbName);
+                    Path renamed = replaceName(relativePath, osbName, dvmNumber);
                     Path target = destination.resolve(renamed);
 
                     Files.createDirectories(target.getParent());
@@ -39,7 +40,7 @@ public class CreateOSB {
 
                     if (isTextFile(content)) {
                         String text = new String(content, StandardCharsets.UTF_8);
-                        text = replacePlaceholders(text, osbName);
+                        text = replacePlaceholders(text, osbName, dvmNumber);
 
                         Files.write(target, text.getBytes(StandardCharsets.UTF_8));
                     } else {
@@ -54,7 +55,7 @@ public class CreateOSB {
                         Path dir, BasicFileAttributes attrs) throws IOException {
 
                     Path relative = tempDirectory.relativize(dir);
-                    Path renamed = replaceName(relative, osbName);
+                    Path renamed = replaceName(relative, osbName, dvmNumber);
 
                     Files.createDirectories(destination.resolve(renamed));
 
@@ -67,9 +68,10 @@ public class CreateOSB {
         }
     }
 
-    private static String replacePlaceholders(String value, String osbName) {
+    private static String replacePlaceholders(String value, String osbName, String dvmNumber) {
         return value
                 .replace(PLACEHOLDER_NAME, osbName)
+                .replace(PLACEHOLDER_DVMNUMBER, dvmNumber)
                 .replace(PLACEHOLDER_SNAME, osbName.replace("BNCR_OSB_", ""))
                 .replace(PLACEHOLDER_lowerNAME, osbName.toLowerCase(java.util.Locale.ROOT));
     }
@@ -134,11 +136,11 @@ public class CreateOSB {
         return true;
     }
 
-    private static Path replaceName(Path relative, String osbName) {
+    private static Path replaceName(Path relative, String osbName, String dvmNumber) {
         Path result = relative.getRoot();
 
         for (Path part : relative) {
-            String name = replacePlaceholders(part.toString(), osbName);
+            String name = replacePlaceholders(part.toString(), osbName, dvmNumber);
 
             result = result == null
                     ? Paths.get(name)
