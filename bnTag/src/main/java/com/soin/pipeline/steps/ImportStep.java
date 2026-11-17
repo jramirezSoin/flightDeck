@@ -24,6 +24,11 @@ public class ImportStep implements PipelineStep {
             return StepResult.skipped("Import de " + target.label() + " no ejecutado porque se indicó --skipImport");
         }
 
+        String skipReason = target.skipReason(context);
+        if (skipReason != null) {
+            return StepResult.skipped(skipReason);
+        }
+
         try {
             LOG.info("Ejecutando script SSH...");
 

@@ -45,8 +45,8 @@ public enum DeployTarget {
         }
     },
 
-    /** XML de DVM generado por CheckDVMStep: solo se sube (no hay script de importación). */
-    DVM("XML de DVM", null) {
+    /** XML de DVM generado por CheckDVMStep: se sube y se importa con installDVM.sh. */
+    DVM("XML de DVM", "installDVM.sh") {
         @Override
         String skipReason(PipelineContext context) {
             return context.getDvmXmlFile() == null
@@ -67,7 +67,7 @@ public enum DeployTarget {
 
         @Override
         String scriptArgument(PipelineContext context) {
-            throw new UnsupportedOperationException("El XML de DVM no se importa con un script");
+            return remoteName(context);
         }
     };
 

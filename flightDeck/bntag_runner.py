@@ -22,7 +22,7 @@ DVM_COMPLEXITIES = ("simple", "complex", "ramificado")
 
 STEPS_SOA = ["LoadContext", "UploadFileStep", "ImportStep"]
 STEPS_SOA_CREATE = ["LoadContext", "CreateSOAStep"]
-STEPS_OSB_CREATE = ["LoadContext", "CheckDVMStep", "UploadFileStep", "CreateOSBStep"]
+STEPS_OSB_CREATE = ["LoadContext", "CheckDVMStep", "UploadFileStep", "ImportStep", "CreateOSBStep"]
 STEPS_OSB = ["LoadContext", "GitStatusStep", "OSBCompile", "UploadFileStep", "ImportStep"]
 
 RE_RUNNING = re.compile(r"^Ejecutando: (\S+)\s*$")
