@@ -473,4 +473,4 @@ $("gitCommit").addEventListener("click", async () => {
   gitUpdateButtons();
 });
 
-$("gitPush").addEventListener("click", () => gitOp("push", {}, "push origin " + (gitBranchName || "<rama>")));
+$("gitPush").addEventListener("click", () => gitOp("push", {}, "push origin dev"));

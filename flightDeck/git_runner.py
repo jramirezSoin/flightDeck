@@ -14,6 +14,7 @@ from pathlib import Path
 from . import bntag_runner
 
 TIMEOUT = 120  # segundos; el push puede tardar
+PUSH_BRANCH = "dev"  # política laboral: todo se envía a origin/dev
 MAX_PATHS = 2000
 MAX_MESSAGE = 10_000
 
@@ -181,12 +182,9 @@ def commit(path: str, message) -> str:
 
 
 def push(path: str) -> str:
-    """`git push origin <rama actual>` (nunca --force). Siempre a 'origin', sin depender del
-    upstream configurado (el repo también tiene el remoto 'upstream')."""
+    """`git push origin dev` (nunca --force). Por política laboral todo se envía a la rama 'dev'
+    de 'origin', sin depender del upstream configurado (el repo también tiene el remoto 'upstream')."""
     repo = _repo_dir(path)
     with _lock:
-        code, branch = _run(repo, ["symbolic-ref", "--short", "HEAD"], check=False)
-        if code != 0 or not branch:
-            raise GitError("No estás en una rama; no se puede hacer push.")
-        _, out = _run(repo, ["push", "origin", branch])
+        _, out = _run(repo, ["push", "origin", PUSH_BRANCH])
     return out
