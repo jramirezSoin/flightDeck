@@ -20,6 +20,11 @@ public class ReleaseStep implements PipelineStep {
 
         try {
             LOG.info("Verificación de release "+context.getRelease());
+            Path carpeta = Paths.get(context.getReleaseDir() + "/" + context.getRelease());
+
+            if (Files.isDirectory(carpeta)) {
+                return StepResult.failed("Release ya existe en " + context.getReleaseDir() + ", no se creará nuevamente");
+            }
             CreateRelease.create(context.getRelease(), context.getReleaseDir());
             return StepResult.success("Inserción a release ejecutado correctamente");
 
