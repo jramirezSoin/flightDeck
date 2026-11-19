@@ -2,9 +2,8 @@ package com.soin.pipeline.steps;
 
 import java.util.logging.Logger;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.IOException;
+import java.nio.file.*;
 
 import com.soin.pipeline.PipelineContext;
 import com.soin.pipeline.PipelineStep;
@@ -40,8 +39,11 @@ public class ReleaseStep implements PipelineStep {
             //}
             String tipo = (context.isOSB())?"OSB":((context.isSOA())?"SOA":"release");
             CreateRelease.create(context.getRelease(), carpeta,tipo);
-            if(target!=null)
+            if(target!=null){
                 LOG.info("Archivo a mover "+target.localFile(context));
+                copiarArchivo(target.localFile(context), context.getReleaseDir() + "/" + context.getRelease() + "/JARs/" + tipo);
+            }
+                
             return StepResult.success("Inserción a release ejecutado correctamente");
 
         } catch (Exception e) {
@@ -49,6 +51,19 @@ public class ReleaseStep implements PipelineStep {
                 "Error ejecutando Inserción a release: "
                 + (e.getMessage() != null ? e.getMessage() : e.toString()));
         }
+    }
+
+    public static void copiarArchivo(String origen, String carpetaDestino) throws IOException {
+        Path archivoOrigen = Paths.get(origen);
+        Path carpeta = Paths.get(carpetaDestino);
+
+        // Crea la carpeta de destino si no existe
+        Files.createDirectories(carpeta);
+
+        // Mantiene el mismo nombre del archivo dentro de la carpeta destino
+        Path archivoDestino = carpeta.resolve(archivoOrigen.getFileName());
+
+        Files.copy(archivoOrigen, archivoDestino, StandardCopyOption.REPLACE_EXISTING);
     }
 
 }
