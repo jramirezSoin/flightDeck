@@ -41,7 +41,8 @@ public class ReleaseStep implements PipelineStep {
             CreateRelease.create(context.getRelease(), carpeta,tipo);
             if(target!=null){
                 LOG.info("Archivo a copiar "+target.localFile(context));
-                copiarArchivo(target.localFile(context), context.getReleaseDir() + "/" + context.getRelease() + "/JARs/" + tipo);
+                Path copiado = copiarArchivo(target.localFile(context), context.getReleaseDir() + "/" + context.getRelease() + "/JARs/" + tipo);
+                context.setReleasedJar(copiado.toString());
             }
                 
             return StepResult.success("Inserción a release ejecutado correctamente");
@@ -53,7 +54,7 @@ public class ReleaseStep implements PipelineStep {
         }
     }
 
-    public static void copiarArchivo(String origen, String carpetaDestino) throws IOException {
+    public static Path copiarArchivo(String origen, String carpetaDestino) throws IOException {
         Path archivoOrigen = Paths.get(origen);
         Path carpeta = Paths.get(carpetaDestino);
 
@@ -64,6 +65,7 @@ public class ReleaseStep implements PipelineStep {
         Path archivoDestino = carpeta.resolve(archivoOrigen.getFileName());
 
         Files.copy(archivoOrigen, archivoDestino, StandardCopyOption.REPLACE_EXISTING);
+        return archivoDestino;
     }
 
 }

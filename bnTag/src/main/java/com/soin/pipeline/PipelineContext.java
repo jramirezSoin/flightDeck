@@ -33,6 +33,7 @@ public class PipelineContext {
     private String dvmArea;
     private String dvmComplexity = "simple";
     private String release="";
+    private String releasedJar;
 
     private List<String> gitFiles;
 
@@ -42,6 +43,15 @@ public class PipelineContext {
 
     public void setRelease(String release){
         this.release=release;
+    }
+
+    /** Ruta del JAR copiado al release en esta ejecución; null si no se copió ninguno. */
+    public String getReleasedJar(){
+        return this.releasedJar;
+    }
+
+    public void setReleasedJar(String releasedJar){
+        this.releasedJar=releasedJar;
     }
 
     public String getReleaseDir(){

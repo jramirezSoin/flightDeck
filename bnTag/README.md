@@ -86,6 +86,6 @@ installBN.sh --release <release>
 | `--rest` | Con `--create`, incluye el ProxyService REST |
 | `--dvmArea <área>` | Con `--create` de un OSB, área de aplicación de la DVM (ej. `SINPE_MOVIL`); sin ella no se genera ni se sube el XML de DVM |
 | `--dvmComplexity <valor>` | Con `--dvmArea`: `simple` (por defecto), `complex` o `ramificado` |
-| `--release <nombre>` | Crea la carpeta del release en `dest.release.dir` (plantilla de documentación; no pisa archivos existentes). Con `-osb`/`-soa` copia además el JAR instalado a `JARs/OSB` o `JARs/SOA`. Solo, crea el release sin instalar nada. No aplica con `--create` |
+| `--release <nombre>` | Crea la carpeta del release en `dest.release.dir` (plantilla de documentación; no pisa archivos existentes). Con `-osb`/`-soa` copia además el JAR instalado a `JARs/OSB` o `JARs/SOA` y `ValidationStep` lo abre y lista su contenido (las reglas de validación de OSB y SOA se irán agregando). Solo, crea el release sin instalar nada. No aplica con `--create` |
 
 El proceso termina con código `1` si algún paso falla.

@@ -135,7 +135,8 @@ public class App {
                     .addStep(new LoadContext())
                     .addStep(new UploadFileStep(DeployTarget.SOA))
                     .addStep(new ImportStep(DeployTarget.SOA))
-                    .addStep(new ReleaseStep(DeployTarget.SOA));
+                    .addStep(new ReleaseStep(DeployTarget.SOA))
+                    .addStep(new ValidationStep());
             }
             else if (context.isOSB() && context.isCreate()) {
                 pipeline
@@ -152,7 +153,8 @@ public class App {
                     .addStep(new OSBCompile())
                     .addStep(new UploadFileStep(DeployTarget.OSB))
                     .addStep(new ImportStep(DeployTarget.OSB))
-                    .addStep(new ReleaseStep(DeployTarget.OSB));
+                    .addStep(new ReleaseStep(DeployTarget.OSB))
+                    .addStep(new ValidationStep());
             } else if (!"".equals(context.getRelease())){
                 pipeline
                     .addStep(new LoadContext())

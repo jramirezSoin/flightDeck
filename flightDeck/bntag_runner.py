@@ -20,10 +20,10 @@ NAME_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
 DVM_AREA_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 _.-]{0,59}$")
 DVM_COMPLEXITIES = ("simple", "complex", "ramificado")
 
-STEPS_SOA = ["LoadContext", "UploadFileStep", "ImportStep", "ReleaseStep"]
+STEPS_SOA = ["LoadContext", "UploadFileStep", "ImportStep", "ReleaseStep", "ValidationStep"]
 STEPS_SOA_CREATE = ["LoadContext", "CreateSOAStep"]
 STEPS_OSB_CREATE = ["LoadContext", "CheckDVMStep", "UploadFileStep", "ImportStep", "CreateOSBStep"]
-STEPS_OSB = ["LoadContext", "GitStatusStep", "OSBCompile", "UploadFileStep", "ImportStep", "ReleaseStep"]
+STEPS_OSB = ["LoadContext", "GitStatusStep", "OSBCompile", "UploadFileStep", "ImportStep", "ReleaseStep", "ValidationStep"]
 STEPS_RELEASE = ["LoadContext", "ReleaseStep"]
 
 RE_RUNNING = re.compile(r"^Ejecutando: (\S+)\s*$")
