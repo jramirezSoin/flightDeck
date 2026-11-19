@@ -20,10 +20,11 @@ NAME_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
 DVM_AREA_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 _.-]{0,59}$")
 DVM_COMPLEXITIES = ("simple", "complex", "ramificado")
 
-STEPS_SOA = ["LoadContext", "UploadFileStep", "ImportStep"]
+STEPS_SOA = ["LoadContext", "UploadFileStep", "ImportStep", "ReleaseStep"]
 STEPS_SOA_CREATE = ["LoadContext", "CreateSOAStep"]
 STEPS_OSB_CREATE = ["LoadContext", "CheckDVMStep", "UploadFileStep", "ImportStep", "CreateOSBStep"]
-STEPS_OSB = ["LoadContext", "GitStatusStep", "OSBCompile", "UploadFileStep", "ImportStep"]
+STEPS_OSB = ["LoadContext", "GitStatusStep", "OSBCompile", "UploadFileStep", "ImportStep", "ReleaseStep"]
+STEPS_RELEASE = ["LoadContext", "ReleaseStep"]
 
 RE_RUNNING = re.compile(r"^Ejecutando: (\S+)\s*$")
 RE_RESULT = re.compile(r"^(\S+) -> (SUCCESS|FAILED|SKIPPED)\s*:?\s*(.*)$")
@@ -67,10 +68,21 @@ def validate_request(req: dict) -> tuple[list[str], list[str]]:
     """Valida la petición y devuelve (args de bnTag, pasos esperados)."""
     target = req.get("target")
     name = req.get("name")
-    if target not in ("osb", "soa"):
-        raise RunError("target debe ser 'osb' o 'soa'")
+    if target not in ("osb", "soa", "release"):
+        raise RunError("target debe ser 'osb', 'soa' o 'release'")
     if not isinstance(name, str) or not NAME_RE.match(name):
         raise RunError("Nombre inválido: solo letras, números, '_', '-' y '.'")
+
+    # Crear solo el release: bnTag --release <nombre> (sin -osb/-soa).
+    if target == "release":
+        return ["--release", name], list(STEPS_RELEASE)
+
+    # Release opcional al instalar (mismo patrón de nombre que el resto).
+    release = req.get("release") or ""
+    if not isinstance(release, str) or (release and not NAME_RE.match(release)):
+        raise RunError("Release inválido: solo letras, números, '_', '-' y '.'")
+    if release and req.get("create"):
+        raise RunError("--release no aplica con --create")
 
     flags = {}
     for key in ("project", "skipCompile", "skipImport", "create", "rest"):
@@ -94,6 +106,8 @@ def validate_request(req: dict) -> tuple[list[str], list[str]]:
         args = ["-soa", name]
         if flags["skipImport"]:
             args.append("--skipImport")
+        if release:
+            args += ["--release", release]
         return args, list(STEPS_SOA)
 
     if flags["rest"] and not flags["create"]:
@@ -120,6 +134,8 @@ def validate_request(req: dict) -> tuple[list[str], list[str]]:
     for key in ("project", "skipCompile", "skipImport"):
         if flags[key]:
             args.append("--" + key)
+    if release:
+        args += ["--release", release]
     return args, list(STEPS_OSB)
 
 

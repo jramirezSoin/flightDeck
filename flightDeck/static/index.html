@@ -37,6 +37,7 @@
         <div class="nav-parent"><i class="bi bi-diagram-3" aria-hidden="true"></i> InstallBN</div>
         <button type="button" class="nav-item nav-sub active" data-view="install" aria-current="page"><i class="bi bi-cloud-arrow-up" aria-hidden="true"></i> Instalar</button>
         <button type="button" class="nav-item nav-sub" data-view="create"><i class="bi bi-plus-square" aria-hidden="true"></i> Crear</button>
+        <button type="button" class="nav-item nav-sub" data-view="release"><i class="bi bi-box-seam" aria-hidden="true"></i> Release</button>
       </div>
       <div class="nav-group">
         <button type="button" class="nav-item" data-view="git"><i class="bi bi-git" aria-hidden="true"></i> Git</button>
@@ -120,6 +121,17 @@
               </div>
             </fieldset>
 
+            <fieldset class="group">
+              <legend>Release</legend>
+              <div class="field">
+                <label for="release">Asignar a un release</label>
+                <input id="release" type="text" autocomplete="off" spellcheck="false" placeholder="Ej.: R2026-11"
+                       aria-describedby="releaseHint releaseError">
+                <small id="releaseHint" class="hint">Opcional. Se crea si no existe y se copia el JAR instalado a JARs/OSB o JARs/SOA.</small>
+              </div>
+              <p class="field-error" id="releaseError" role="alert" hidden></p>
+            </fieldset>
+
             <div class="cmdline"><span class="cmdline-label">Comando</span><code id="cmdInstall">-osb &lt;nombre&gt;</code></div>
 
             <div class="actions">
@@ -186,6 +198,30 @@
 
             <div class="actions">
               <button type="submit" id="runCreate" class="btn btn-primary"><i class="bi bi-plus-lg" aria-hidden="true"></i><span>Crear proyecto</span></button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Vista: Release -->
+        <section id="view-release" data-view="release" aria-labelledby="t-release" hidden>
+          <header class="page-head">
+            <h2 id="t-release">Release</h2>
+            <p>Crea la carpeta de un release con la plantilla de documentación, sin instalar nada.</p>
+          </header>
+
+          <form id="release-form" class="card" novalidate>
+            <div class="field">
+              <label for="releaseName">Nombre del release</label>
+              <input id="releaseName" type="text" autocomplete="off" spellcheck="false" placeholder="Ej.: R2026-11"
+                     aria-describedby="releaseNameHint releaseNameError">
+              <small id="releaseNameHint" class="hint">Si ya existe, no se pisan sus archivos.</small>
+            </div>
+            <p class="field-error" id="releaseNameError" role="alert" hidden></p>
+
+            <div class="cmdline"><span class="cmdline-label">Comando</span><code id="cmdRelease">--release &lt;nombre&gt;</code></div>
+
+            <div class="actions">
+              <button type="submit" id="runRelease" class="btn btn-primary"><i class="bi bi-box-seam" aria-hidden="true"></i><span>Crear release</span></button>
             </div>
           </form>
         </section>

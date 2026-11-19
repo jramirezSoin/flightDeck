@@ -40,7 +40,7 @@ public class ReleaseStep implements PipelineStep {
             String tipo = (context.isOSB())?"OSB":((context.isSOA())?"SOA":"release");
             CreateRelease.create(context.getRelease(), carpeta,tipo);
             if(target!=null){
-                LOG.info("Archivo a mover "+target.localFile(context));
+                LOG.info("Archivo a copiar "+target.localFile(context));
                 copiarArchivo(target.localFile(context), context.getReleaseDir() + "/" + context.getRelease() + "/JARs/" + tipo);
             }
                 

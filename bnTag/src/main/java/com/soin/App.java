@@ -20,9 +20,10 @@ public class App {
         System.out.println("Uso: bntag.sh -osb <OSB name> [--project] [--skipCompile] [--skipImport]");
         System.out.println("     bntag.sh -osb <OSB name> --create [--rest] [--dvmArea <area> [--dvmComplexity <simple|complex|ramificado>]]");
         System.out.println("     bntag.sh -soa <SOA name> [--skipImport]");
+        System.out.println("     bntag.sh (-osb <OSB name> | -soa <SOA name>) --release <release>");
+        System.out.println("     bntag.sh --release <release>");
         System.out.println("-osb <nombre>: Proyecto OSB a procesar");
         System.out.println("-soa <nombre>: Proyecto SOA a procesar");
-        System.out.println("-create <nombre>: Crear Release");
         System.out.println("--project: Indica que se está ejecutando un OSB completo y no solo resources individuales de git status");
         System.out.println("--skipCompile: Omite la compilación durante la ejecución");
         System.out.println("--skipImport: Omite la importación durante la ejecución");
@@ -30,7 +31,7 @@ public class App {
         System.out.println("--rest: Con --create, incluye el ProxyService REST");
         System.out.println("--dvmArea: Con --create, área de aplicación de la DVM (si falta, no se genera el XML de DVM)");
         System.out.println("--dvmComplexity: Con --dvmArea, complejidad de la DVM: simple (por defecto), complex o ramificado");
-        System.out.println("--release: asigna una instalación a un release");
+        System.out.println("--release: crea el release si no existe y, con -osb/-soa, copia el JAR instalado a JARs/OSB o JARs/SOA (no aplica con --create)");
     }
 
     private static void fail(String message) {
@@ -65,13 +66,6 @@ public class App {
                         }
                         context.setSOA(true);
                         context.setArchivo(args[++i]);
-                        break;
-
-                    case "-release":
-                        if (i + 1 >= args.length) {
-                            fail("Falta el valor después de --release");
-                        }
-                        context.setRelease(args[++i]);
                         break;
 
                     case "--project":

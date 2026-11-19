@@ -58,6 +58,8 @@ function installArgs() {
   if (osb && $("scopeProject").checked) args.push("--project");
   if (osb && !$("doCompile").checked) args.push("--skipCompile");
   if (!$("doImport").checked) args.push("--skipImport");
+  const release = $("release").value.trim();
+  if (release) args.push("--release", release);
   return args;
 }
 const DVM_AREA_RE = /^[A-Za-z0-9][A-Za-z0-9 _.-]{0,59}$/;
@@ -71,7 +73,11 @@ function createArgs() {
   }
   return args;
 }
+function releaseArgs() {
+  return ["--release", $("releaseName").value.trim() || "<nombre>"];
+}
 function refreshCommands() {
+  $("cmdRelease").textContent = releaseArgs().join(" ");
   $("cmdInstall").textContent = installArgs().join(" ");
   $("cmdCreate").textContent = createArgs().join(" ");
 }
@@ -87,7 +93,7 @@ function refreshCreateForm() {
 $("createTarget").addEventListener("change", refreshCreateForm);
 $("dvmArea").addEventListener("input", () => { clearError("dvmArea"); refreshCommands(); });
 $("dvmComplexity").addEventListener("change", refreshCommands);
-["name", "createName"].forEach((id) => $(id).addEventListener("input", () => { clearError(id); refreshCommands(); }));
+["name", "createName", "release", "releaseName"].forEach((id) => $(id).addEventListener("input", () => { clearError(id); refreshCommands(); }));
 ["scopeGit", "scopeProject", "doCompile", "doImport", "rest"].forEach((id) => $(id).addEventListener("change", refreshCommands));
 
 // Validación en línea: el error va bajo su propio campo.
@@ -101,7 +107,10 @@ function showError(inputId, errorId, text) {
 function clearError(inputId) {
   const input = $(inputId);
   input.removeAttribute("aria-invalid");
-  const errIds = { name: "nameError", createName: "createNameError", dvmArea: "dvmAreaError" };
+  const errIds = {
+    name: "nameError", createName: "createNameError", dvmArea: "dvmAreaError",
+    release: "releaseError", releaseName: "releaseNameError",
+  };
   $(errIds[inputId]).hidden = true;
 }
 function nameValid(inputId, errorId) {
@@ -212,7 +221,7 @@ function setStatus(text, cls) {
 }
 
 function setRunning(running) {
-  for (const [id, idle, busy] of [["run", "Instalar", "Ejecutando…"], ["runCreate", "Crear proyecto", "Ejecutando…"]]) {
+  for (const [id, idle, busy] of [["run", "Instalar", "Ejecutando…"], ["runCreate", "Crear proyecto", "Ejecutando…"], ["runRelease", "Crear release", "Ejecutando…"]]) {
     $(id).disabled = running;
     $(id).querySelector("span").textContent = running ? busy : idle;
   }
@@ -231,6 +240,11 @@ function post(url, body) {
 $("install-form").addEventListener("submit", (ev) => {
   ev.preventDefault();
   if (!nameValid("name", "nameError")) return;
+  const release = $("release").value.trim();
+  if (release && !NAME_RE.test(release)) {
+    showError("release", "releaseError", "Solo letras, números, '_', '-' y '.'.");
+    return;
+  }
   const osb = $("target").value === "osb";
   // Los controles están en positivo (Compilar/Importar); el backend espera flags "skip".
   runJob({
@@ -239,7 +253,14 @@ $("install-form").addEventListener("submit", (ev) => {
     project: osb && $("scopeProject").checked,
     skipCompile: osb && !$("doCompile").checked,
     skipImport: !$("doImport").checked,
+    release,
   });
+});
+
+$("release-form").addEventListener("submit", (ev) => {
+  ev.preventDefault();
+  if (!nameValid("releaseName", "releaseNameError")) return;
+  runJob({ target: "release", name: $("releaseName").value.trim() });
 });
 
 $("create-form").addEventListener("submit", (ev) => {

@@ -56,6 +56,7 @@ Para regenerar el archivo manualmente: borrar `config/application.properties` y 
 |-----------|-------------|
 | `osb.dir`, `soa.dir` | Workspaces locales de OSB y SOA |
 | `dest.jar.dir` | Carpeta local donde se generan los JARs de OSB |
+| `dest.release.dir` | Carpeta local donde se crean los releases (obligatoria) |
 | `server.key` | Llave privada SSH |
 | `server.host`, `server.port`, `server.user` | Conexión SSH al servidor |
 | `server.remote.path` | Carpeta remota donde se suben los JARs |
@@ -71,6 +72,8 @@ Para regenerar el archivo manualmente: borrar `config/application.properties` y 
 installBN.sh -osb <nombre OSB> [--project] [--skipCompile] [--skipImport]
 installBN.sh -osb <nombre OSB> --create [--rest]
 installBN.sh -soa <nombre SOA> [--skipImport]
+installBN.sh (-osb <nombre OSB> | -soa <nombre SOA>) --release <release>
+installBN.sh --release <release>
 ```
 
 | Opción | Efecto |
@@ -83,5 +86,6 @@ installBN.sh -soa <nombre SOA> [--skipImport]
 | `--rest` | Con `--create`, incluye el ProxyService REST |
 | `--dvmArea <área>` | Con `--create` de un OSB, área de aplicación de la DVM (ej. `SINPE_MOVIL`); sin ella no se genera ni se sube el XML de DVM |
 | `--dvmComplexity <valor>` | Con `--dvmArea`: `simple` (por defecto), `complex` o `ramificado` |
+| `--release <nombre>` | Crea la carpeta del release en `dest.release.dir` (plantilla de documentación; no pisa archivos existentes). Con `-osb`/`-soa` copia además el JAR instalado a `JARs/OSB` o `JARs/SOA`. Solo, crea el release sin instalar nada. No aplica con `--create` |
 
 El proceso termina con código `1` si algún paso falla.
