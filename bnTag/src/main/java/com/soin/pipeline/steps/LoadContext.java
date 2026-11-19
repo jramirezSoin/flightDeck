@@ -51,6 +51,7 @@ public class LoadContext implements PipelineStep {
             context.setOsbPath(required("osb.dir"));
             context.setSoaPath(required("soa.dir"));
             context.setLocalFile(required("dest.jar.dir"));
+            context.setReleaseDir(required("dest.release.dir"));
             context.setHost(required("server.host"));
             context.setUsername(required("server.user"));
             context.setPrivateKey(required("server.key"));

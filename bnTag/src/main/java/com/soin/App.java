@@ -65,6 +65,13 @@ public class App {
                         context.setArchivo(args[++i]);
                         break;
 
+                    case "-release":
+                        if (i + 1 >= args.length) {
+                            fail("Falta el valor después de --release");
+                        }
+                        context.setRelease(args[++i]);
+                        break;
+
                     case "--project":
                         context.setProject(true);
                         break;
@@ -79,6 +86,13 @@ public class App {
 
                     case "--create":
                         context.setCreate(true);
+                        break;
+                    
+                    case "--release":
+                        if (i + 1 >= args.length) {
+                            fail("Falta el valor después de --release");
+                        }
+                        context.setRelease(args[++i]);
                         break;
 
                     case "--rest":
@@ -124,7 +138,8 @@ public class App {
                 pipeline
                     .addStep(new LoadContext())
                     .addStep(new UploadFileStep(DeployTarget.SOA))
-                    .addStep(new ImportStep(DeployTarget.SOA));
+                    .addStep(new ImportStep(DeployTarget.SOA))
+                    .addStep(new ReleaseStep());
             }
             else if (context.isOSB() && context.isCreate()) {
                 pipeline
@@ -140,7 +155,11 @@ public class App {
                     .addStep(new GitStatusStep())
                     .addStep(new OSBCompile())
                     .addStep(new UploadFileStep(DeployTarget.OSB))
-                    .addStep(new ImportStep(DeployTarget.OSB));
+                    .addStep(new ImportStep(DeployTarget.OSB))
+                    .addStep(new ReleaseStep());
+            } else if (!"".equals(context.getRelease())){
+                pipeline
+                    .addStep(new ReleaseStep());
             } else {
                 fail("No se especificó ni un OSB ni un SOA para ejecutar el pipeline");
             }

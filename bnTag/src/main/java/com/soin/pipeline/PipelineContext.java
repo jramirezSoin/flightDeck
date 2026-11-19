@@ -13,6 +13,7 @@ public class PipelineContext {
 
     private String localFile;
     private String remoteFile;
+    private String releaseDir;
 
     private String osbPath;
     private String soaPath;
@@ -31,8 +32,25 @@ public class PipelineContext {
     private String dvmXmlFile;
     private String dvmArea;
     private String dvmComplexity = "simple";
+    private String release="";
 
     private List<String> gitFiles;
+
+    public String getRelease(){
+        return this.release;
+    }
+
+    public void setRelease(String release){
+        this.release=release;
+    }
+
+    public String getReleaseDir(){
+        return this.releaseDir;
+    }
+
+    public void setReleaseDir(String releaseDir){
+        this.releaseDir=releaseDir;
+    }
 
     public int getDvmNumber(){
         return dvmNumber;

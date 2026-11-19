@@ -8,6 +8,7 @@ soa.dir=${BN_WORKSPACE_ROOT}/BNCR_SOA_WORKSPACE/
 
 #ruta de almacenamiento de JARs de OSB
 dest.jar.dir=C:/Users/${BN_WIN_USER}/Documents/OSB_Resources/
+dest.release.dir=C:/Users/${BN_WIN_USER}/Documents/BN/Releases/
 
 #Clave de acceso a servidor linux
 server.key=C:/Users/${BN_WIN_USER}/Documents/id_rsa
