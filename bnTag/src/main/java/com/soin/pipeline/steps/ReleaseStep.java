@@ -15,6 +15,15 @@ public class ReleaseStep implements PipelineStep {
 
     private static final Logger LOG = Logger.getLogger(ReleaseStep.class.getName());
 
+    private DeployTarget target = null;
+
+    public ReleaseStep(DeployTarget target) {
+        this.target = target;
+    }
+
+    public ReleaseStep() {
+    }
+
     @Override
     public StepResult execute(PipelineContext context) {
         if ("".equals(context.getRelease())) {
@@ -26,10 +35,13 @@ public class ReleaseStep implements PipelineStep {
             LOG.info("Verificación de release "+context.getRelease());
             Path carpeta = Paths.get(context.getReleaseDir() + "/" + context.getRelease());
 
-            if (Files.isDirectory(carpeta)) {
-                return StepResult.failed("Release ya existe en " + context.getReleaseDir() + ", no se creará nuevamente");
-            }
-            CreateRelease.create(context.getRelease(), context.getReleaseDir());
+            //if (Files.isDirectory(carpeta)) {
+             //   return StepResult.failed("Release ya existe en " + context.getReleaseDir() + ", no se creará nuevamente");
+            //}
+            String tipo = (context.isOSB())?"OSB":((context.isSOA())?"SOA":"release");
+            CreateRelease.create(context.getRelease(), carpeta,tipo);
+            if(target!=null)
+                LOG.info("Archivo a mover "+target.localFile(context));
             return StepResult.success("Inserción a release ejecutado correctamente");
 
         } catch (Exception e) {

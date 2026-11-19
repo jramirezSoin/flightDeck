@@ -11,7 +11,7 @@ public class CreateRelease {
     private static final String TEMPLATE_PATH = "/templates/Release_Template";
     private static final String PLACEHOLDER_NAME = "{NAME}";
 
-    public static void create(String releaseName, Path destination) throws IOException {
+    public static void create(String releaseName, Path destination, String type) throws IOException {
 
         // createTempDirectory no crea el directorio base; java.io.tmpdir (java_opts.txt) puede no existir
         // porque el lanzador lo limpia antes de cada ejecución.
@@ -19,7 +19,7 @@ public class CreateRelease {
         Path tempDirectory = Files.createTempDirectory("osb-template-");
 
         try {
-            copyResourceDirectory(TEMPLATE_PATH, tempDirectory);
+            copyResourceDirectory(TEMPLATE_PATH, tempDirectory, type);
 
             Files.walkFileTree(tempDirectory, new SimpleFileVisitor<Path>() {
 
@@ -30,6 +30,11 @@ public class CreateRelease {
                     Path relativePath = tempDirectory.relativize(file);
                     Path renamed = replaceName(relativePath, releaseName);
                     Path target = destination.resolve(renamed);
+
+                    // Si ya existe, no se toca
+                    if (Files.exists(target)) {
+                        return FileVisitResult.CONTINUE;
+                    }
 
                     Files.createDirectories(target.getParent());
 
@@ -69,7 +74,7 @@ public class CreateRelease {
         return value.replace(PLACEHOLDER_NAME, releaseName);
     }
 
-    private static void copyResourceDirectory(String resourcePath, Path destination ) throws IOException {
+    private static void copyResourceDirectory(String resourcePath, Path destination, String type) throws IOException {
 
         String indexPath = resourcePath + "/template.index";
 
@@ -85,8 +90,19 @@ public class CreateRelease {
 
             for (String entry : entries) {
                 entry = entry.trim();
+                String tipo="release";
 
                 if (entry.isEmpty()) {
+                    continue;
+                }
+
+                if(entry.contains("|")){
+                    String[] partes = entry.split("\\|", 2);
+                    tipo = partes[0].trim();
+                    entry = partes[1].trim();
+                }
+
+                if(!"release".equals(tipo) && !type.equals(tipo)){
                     continue;
                 }
 

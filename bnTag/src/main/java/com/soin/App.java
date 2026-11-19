@@ -22,6 +22,7 @@ public class App {
         System.out.println("     bntag.sh -soa <SOA name> [--skipImport]");
         System.out.println("-osb <nombre>: Proyecto OSB a procesar");
         System.out.println("-soa <nombre>: Proyecto SOA a procesar");
+        System.out.println("-create <nombre>: Crear Release");
         System.out.println("--project: Indica que se está ejecutando un OSB completo y no solo resources individuales de git status");
         System.out.println("--skipCompile: Omite la compilación durante la ejecución");
         System.out.println("--skipImport: Omite la importación durante la ejecución");
@@ -29,6 +30,7 @@ public class App {
         System.out.println("--rest: Con --create, incluye el ProxyService REST");
         System.out.println("--dvmArea: Con --create, área de aplicación de la DVM (si falta, no se genera el XML de DVM)");
         System.out.println("--dvmComplexity: Con --dvmArea, complejidad de la DVM: simple (por defecto), complex o ramificado");
+        System.out.println("--release: asigna una instalación a un release");
     }
 
     private static void fail(String message) {
@@ -139,7 +141,7 @@ public class App {
                     .addStep(new LoadContext())
                     .addStep(new UploadFileStep(DeployTarget.SOA))
                     .addStep(new ImportStep(DeployTarget.SOA))
-                    .addStep(new ReleaseStep());
+                    .addStep(new ReleaseStep(DeployTarget.SOA));
             }
             else if (context.isOSB() && context.isCreate()) {
                 pipeline
@@ -156,9 +158,10 @@ public class App {
                     .addStep(new OSBCompile())
                     .addStep(new UploadFileStep(DeployTarget.OSB))
                     .addStep(new ImportStep(DeployTarget.OSB))
-                    .addStep(new ReleaseStep());
+                    .addStep(new ReleaseStep(DeployTarget.OSB));
             } else if (!"".equals(context.getRelease())){
                 pipeline
+                    .addStep(new LoadContext())
                     .addStep(new ReleaseStep());
             } else {
                 fail("No se especificó ni un OSB ni un SOA para ejecutar el pipeline");
