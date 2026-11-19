@@ -1,5 +1,10 @@
 package com.soin.pipeline.steps;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -38,8 +43,9 @@ public class ValidationStep implements PipelineStep {
             }
 
             List<String> errors = validator.validate(jar);
+            String controlNote = writeControlFile(context, jarPath, errors);
             if (!errors.isEmpty()) {
-                return StepResult.failed("Validación con errores: " + String.join("; ", errors));
+                return StepResult.failed("Validación con errores: " + String.join("; ", errors) + controlNote);
             }
             return StepResult.success("Validación ejecutada correctamente (" + jar.size() + " archivos)");
 
@@ -47,6 +53,36 @@ public class ValidationStep implements PipelineStep {
             return StepResult.failed(
                 "Error ejecutando Validación: "
                 + (e.getMessage() != null ? e.getMessage() : e.toString()));
+        }
+    }
+
+    /**
+     * Deja los errores en <release>/control/<nombre del jar>.error (un error por línea).
+     * Sin errores borra el archivo de una ejecución anterior para que no quede desactualizado.
+     * Un problema al escribir no cambia el resultado de la validación; solo se avisa.
+     *
+     * @return texto para agregar al mensaje del step ("" si no hay nada que avisar)
+     */
+    private String writeControlFile(PipelineContext context, String jarPath, List<String> errors) {
+        try {
+            String jarName = Paths.get(jarPath).getFileName().toString();
+            String base = jarName.toLowerCase().endsWith(".jar")
+                    ? jarName.substring(0, jarName.length() - ".jar".length())
+                    : jarName;
+            Path controlDir = Paths.get(context.getReleaseDir(), context.getRelease(), "control");
+            Path errorFile = controlDir.resolve(base + ".error");
+
+            if (errors.isEmpty()) {
+                Files.deleteIfExists(errorFile);
+                return "";
+            }
+            Files.createDirectories(controlDir);
+            Files.write(errorFile, errors, StandardCharsets.UTF_8);
+            LOG.info("Errores guardados en " + errorFile);
+            return " (detalle en " + errorFile + ")";
+        } catch (IOException e) {
+            LOG.warning("No se pudo escribir el archivo de control: " + e.getMessage());
+            return " (no se pudo escribir el archivo de control: " + e.getMessage() + ")";
         }
     }
 }
