@@ -73,7 +73,7 @@ installBN.sh -osb <nombre OSB> [--project] [--skipCompile] [--skipImport]
 installBN.sh -osb <nombre OSB> --create [--rest]
 installBN.sh -soa <nombre SOA> [--skipImport]
 installBN.sh (-osb <nombre OSB> | -soa <nombre SOA>) --release <release>
-installBN.sh --release <release>
+installBN.sh --release <release> [--description <texto>]
 ```
 
 | Opción | Efecto |
@@ -86,6 +86,7 @@ installBN.sh --release <release>
 | `--rest` | Con `--create`, incluye el ProxyService REST |
 | `--dvmArea <área>` | Con `--create` de un OSB, área de aplicación de la DVM (ej. `SINPE_MOVIL`); sin ella no se genera ni se sube el XML de DVM |
 | `--dvmComplexity <valor>` | Con `--dvmArea`: `simple` (por defecto), `complex` o `ramificado` |
-| `--release <nombre>` | Crea la carpeta del release en `dest.release.dir` (plantilla de documentación; no pisa archivos existentes). Con `-osb`/`-soa` copia además el JAR instalado a `JARs/OSB` o `JARs/SOA` y `ValidationStep` lo abre y lista su contenido (las reglas de validación de OSB y SOA se irán agregando). Solo, crea el release sin instalar nada. No aplica con `--create` |
+| `--release <nombre>` | Solo (sin `-osb`/`-soa`): crea la carpeta del release en `dest.release.dir` (plantilla de documentación; no pisa archivos existentes) y `control/release.json` (nombre, descripción, fecha de creación; no se sobrescribe si ya existe). Con `-osb`/`-soa`: el release **debe existir** (tener `control/release.json`) o `ReleaseStep` falla; copia el JAR instalado a `JARs/OSB` o `JARs/SOA` y `ValidationStep` lo abre y lista su contenido (las reglas de validación de OSB y SOA se irán agregando). No aplica con `--create` |
+| `--description <texto>` | Solo con `--release` sin `-osb`/`-soa`: descripción que se guarda en `release.json` (vacía si se omite) |
 
 El proceso termina con código `1` si algún paso falla.

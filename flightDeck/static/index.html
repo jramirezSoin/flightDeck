@@ -127,7 +127,7 @@
                 <label for="release">Asignar a un release</label>
                 <input id="release" type="text" autocomplete="off" spellcheck="false" placeholder="Ej.: HU217172"
                        aria-describedby="releaseHint releaseError">
-                <small id="releaseHint" class="hint">Opcional. Se crea si no existe y se copia el JAR instalado a JARs/OSB o JARs/SOA.</small>
+                <small id="releaseHint" class="hint">Opcional. El release debe existir (créalo en la vista Release); se copia el JAR instalado a JARs/OSB o JARs/SOA.</small>
               </div>
               <p class="field-error" id="releaseError" role="alert" hidden></p>
             </fieldset>
@@ -217,6 +217,15 @@
               <small id="releaseNameHint" class="hint">Si ya existe, no se pisan sus archivos.</small>
             </div>
             <p class="field-error" id="releaseNameError" role="alert" hidden></p>
+
+            <div class="field">
+              <label for="releaseDescription">Descripción</label>
+              <input id="releaseDescription" type="text" autocomplete="off" maxlength="200"
+                     placeholder="Ej.: Ajustes al servicio de consulta de saldos"
+                     aria-describedby="releaseDescriptionHint releaseDescriptionError">
+              <small id="releaseDescriptionHint" class="hint">Se guarda en control/release.json junto con el nombre y la fecha de creación.</small>
+            </div>
+            <p class="field-error" id="releaseDescriptionError" role="alert" hidden></p>
 
             <div class="cmdline"><span class="cmdline-label">Comando</span><code id="cmdRelease">--release &lt;nombre&gt;</code></div>
 

@@ -14,7 +14,7 @@ from pathlib import Path
 from . import bntag_runner
 
 TIMEOUT = 120  # segundos; el push puede tardar
-PUSH_BRANCH = "dev"  # política laboral: todo se envía a origin/dev
+PUSH_BRANCH = "dev:dev"  # política laboral: todo se envía a origin/dev
 MAX_PATHS = 2000
 MAX_MESSAGE = 10_000
 

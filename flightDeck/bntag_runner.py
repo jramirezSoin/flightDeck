@@ -18,7 +18,8 @@ JAR_NAME = "installbn-1.0.0.jar"
 TMP_DIR = "C:/Temp/osbinstance"  # mismo valor que el rm -rf de installBN.sh
 NAME_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
 DVM_AREA_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 _.-]{0,59}$")
-DVM_COMPLEXITIES = ("simple", "complex", "ramificado")
+DESCRIPTION_MAX = 200
+DVM_COMPLEXITIES =("simple", "complex", "ramificado")
 
 STEPS_SOA = ["LoadContext", "UploadFileStep", "ImportStep", "ReleaseStep", "ValidationStep"]
 STEPS_SOA_CREATE = ["LoadContext", "CreateSOAStep"]
@@ -75,7 +76,13 @@ def validate_request(req: dict) -> tuple[list[str], list[str]]:
 
     # Crear solo el release: bnTag --release <nombre> (sin -osb/-soa).
     if target == "release":
-        return ["--release", name], list(STEPS_RELEASE)
+        description = req.get("description")
+        if not isinstance(description, str) or not description.strip():
+            raise RunError("Falta la descripción del release")
+        description = description.strip()
+        if len(description) > DESCRIPTION_MAX or any(ord(c) < 32 for c in description):
+            raise RunError(f"Descripción inválida: una sola línea, máx. {DESCRIPTION_MAX} caracteres")
+        return ["--release", name, "--description", description], list(STEPS_RELEASE)
 
     # Release opcional al instalar (mismo patrón de nombre que el resto).
     release = req.get("release") or ""

@@ -21,7 +21,7 @@ public class App {
         System.out.println("     bntag.sh -osb <OSB name> --create [--rest] [--dvmArea <area> [--dvmComplexity <simple|complex|ramificado>]]");
         System.out.println("     bntag.sh -soa <SOA name> [--skipImport]");
         System.out.println("     bntag.sh (-osb <OSB name> | -soa <SOA name>) --release <release>");
-        System.out.println("     bntag.sh --release <release>");
+        System.out.println("     bntag.sh --release <release> [--description <texto>]");
         System.out.println("-osb <nombre>: Proyecto OSB a procesar");
         System.out.println("-soa <nombre>: Proyecto SOA a procesar");
         System.out.println("--project: Indica que se está ejecutando un OSB completo y no solo resources individuales de git status");
@@ -31,7 +31,8 @@ public class App {
         System.out.println("--rest: Con --create, incluye el ProxyService REST");
         System.out.println("--dvmArea: Con --create, área de aplicación de la DVM (si falta, no se genera el XML de DVM)");
         System.out.println("--dvmComplexity: Con --dvmArea, complejidad de la DVM: simple (por defecto), complex o ramificado");
-        System.out.println("--release: crea el release si no existe y, con -osb/-soa, copia el JAR instalado a JARs/OSB o JARs/SOA (no aplica con --create)");
+        System.out.println("--release: sin -osb/-soa crea el release (con control/release.json); con -osb/-soa el release debe existir y se copia el JAR instalado a JARs/OSB o JARs/SOA (no aplica con --create)");
+        System.out.println("--description: Con --release (sin -osb/-soa), descripción que se guarda en release.json");
     }
 
     private static void fail(String message) {
@@ -45,6 +46,7 @@ public class App {
         Logging.configure();
 
         PipelineContext context = new PipelineContext();
+        boolean hasDescription = false;
 
         try {
 
@@ -91,6 +93,14 @@ public class App {
                         context.setRelease(args[++i]);
                         break;
 
+                    case "--description":
+                        if (i + 1 >= args.length) {
+                            fail("Falta el valor después de --description");
+                        }
+                        context.setReleaseDescription(args[++i]);
+                        hasDescription = true;
+                        break;
+
                     case "--rest":
                         context.setRest(true);
                         break;
@@ -121,6 +131,10 @@ public class App {
 
             if (context.isOSB() && context.isSOA()) {
                 fail("No se puede usar -osb y -soa en la misma ejecución");
+            }
+
+            if (hasDescription && ("".equals(context.getRelease()) || context.isOSB() || context.isSOA())) {
+                fail("--description solo aplica al crear el release (--release sin -osb/-soa)");
             }
 
             Pipeline pipeline = new Pipeline();

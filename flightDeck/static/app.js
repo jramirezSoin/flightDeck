@@ -74,7 +74,10 @@ function createArgs() {
   return args;
 }
 function releaseArgs() {
-  return ["--release", $("releaseName").value.trim() || "<nombre>"];
+  const args = ["--release", $("releaseName").value.trim() || "<nombre>"];
+  const desc = $("releaseDescription").value.trim();
+  args.push("--description", desc ? `"${desc}"` : '"<descripción>"');
+  return args;
 }
 function refreshCommands() {
   $("cmdRelease").textContent = releaseArgs().join(" ");
@@ -93,7 +96,7 @@ function refreshCreateForm() {
 $("createTarget").addEventListener("change", refreshCreateForm);
 $("dvmArea").addEventListener("input", () => { clearError("dvmArea"); refreshCommands(); });
 $("dvmComplexity").addEventListener("change", refreshCommands);
-["name", "createName", "release", "releaseName"].forEach((id) => $(id).addEventListener("input", () => { clearError(id); refreshCommands(); }));
+["name", "createName", "release", "releaseName", "releaseDescription"].forEach((id) => $(id).addEventListener("input", () => { clearError(id); refreshCommands(); }));
 ["scopeGit", "scopeProject", "doCompile", "doImport", "rest"].forEach((id) => $(id).addEventListener("change", refreshCommands));
 
 // Validación en línea: el error va bajo su propio campo.
@@ -109,7 +112,7 @@ function clearError(inputId) {
   input.removeAttribute("aria-invalid");
   const errIds = {
     name: "nameError", createName: "createNameError", dvmArea: "dvmAreaError",
-    release: "releaseError", releaseName: "releaseNameError",
+    release: "releaseError", releaseName: "releaseNameError", releaseDescription: "releaseDescriptionError",
   };
   $(errIds[inputId]).hidden = true;
 }
@@ -260,7 +263,12 @@ $("install-form").addEventListener("submit", (ev) => {
 $("release-form").addEventListener("submit", (ev) => {
   ev.preventDefault();
   if (!nameValid("releaseName", "releaseNameError")) return;
-  runJob({ target: "release", name: $("releaseName").value.trim() });
+  const description = $("releaseDescription").value.trim();
+  if (!description) {
+    showError("releaseDescription", "releaseDescriptionError", "Escribe la descripción del release.");
+    return;
+  }
+  runJob({ target: "release", name: $("releaseName").value.trim(), description });
 });
 
 $("create-form").addEventListener("submit", (ev) => {

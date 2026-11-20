@@ -37,6 +37,17 @@ public class PipelineContext {
 
     private List<String> gitFiles;
 
+    private String releaseDescription="";
+
+    /** Descripción del release (solo se usa al crearlo con --release sin -osb/-soa). */
+    public String getReleaseDescription(){
+        return this.releaseDescription;
+    }
+
+    public void setReleaseDescription(String releaseDescription){
+        this.releaseDescription=releaseDescription;
+    }
+
     public String getRelease(){
         return this.release;
     }

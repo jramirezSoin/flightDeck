@@ -34,12 +34,16 @@ public class ReleaseStep implements PipelineStep {
             LOG.info("Verificación de release "+context.getRelease());
             Path carpeta = Paths.get(context.getReleaseDir() + "/" + context.getRelease());
 
-            //if (Files.isDirectory(carpeta)) {
-             //   return StepResult.failed("Release ya existe en " + context.getReleaseDir() + ", no se creará nuevamente");
-            //}
+            // Al instalar (target != null) el release debe haberse creado antes (control/release.json).
+            if (target != null && !ReleaseInfo.exists(context.getReleaseDir(), context.getRelease())) {
+                return StepResult.failed("El release " + context.getRelease() + " no existe en "
+                    + context.getReleaseDir() + "; créalo primero con --release " + context.getRelease());
+            }
             String tipo = (context.isOSB())?"OSB":((context.isSOA())?"SOA":"release");
             CreateRelease.create(context.getRelease(), carpeta,tipo);
-            if(target!=null){
+            if(target==null){
+                ReleaseInfo.writeIfAbsent(context.getReleaseDir(), context.getRelease(), context.getReleaseDescription());
+            } else {
                 LOG.info("Archivo a copiar "+target.localFile(context));
                 Path copiado = copiarArchivo(target.localFile(context), context.getReleaseDir() + "/" + context.getRelease() + "/JARs/" + tipo);
                 context.setReleasedJar(copiado.toString());
